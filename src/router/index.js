@@ -1,29 +1,45 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Vue from "vue";
+import VueRouter from "vue-router";
+import Login from "../views/Login.vue";
+import Dashboard from "../views/Dashboard.vue";
+import Clientes from "../views/Clientes.vue";
+import Equipos from "../views/Equipos.vue";
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
+  { path: "/", redirect: "/login" },
+  { path: "/login", component: Login },
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path: "/dashboard",
+    component: Dashboard,
+    meta: { requiresAuth: true },
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: "/clientes",
+    component: Clientes,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/equipos",
+    component: Equipos,
+    meta: { requiresAuth: true },
+  },
+];
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-})
+  mode: "history",
+  routes,
+});
 
-export default router
+// Protección de rutas (simulado)
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem("auth") === "true";
+  if (to.matched.some((r) => r.meta.requiresAuth) && !isAuthenticated) {
+    next("/login");
+  } else {
+    next();
+  }
+});
+
+export default router;
