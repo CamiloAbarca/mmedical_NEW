@@ -43,7 +43,6 @@
       </template>
 
     </b-table>
-
     <!-- Paginación -->
     <b-pagination v-model="paginaActual" :total-rows="equiposFiltrados.length" :per-page="porPagina" align="center"
       class="mt-3" pills variant="primary" />
@@ -149,14 +148,8 @@ export default {
       this.equipoSeleccionado = null
     },
 
-    editarEquipo(equipoActualizado) {
-      const index = this.equipos.findIndex(e => e.id === equipoActualizado.id)
-      if (index !== -1) {
-        this.equipos.splice(index, 1, equipoActualizado)
-      } else {
-        // Emitir evento para que el padre actualice nuevosEquipos
-        this.$emit('actualizar-nuevo-equipo', equipoActualizado)
-      }
+    editarEquipo(equipo) {
+      alert(`Editando equipo ID ${equipo.id}`)
     },
 
     eliminarEquipo(equipo) {
