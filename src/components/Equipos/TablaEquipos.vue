@@ -36,19 +36,22 @@
     <!-- Tabla -->
     <b-table :items="paginatedEquipos" :fields="fields" responsive striped hover small>
       <template #cell(acciones)="row">
-        <b-button size="sm" class="me-1" style="background-color: #4ecdc4; border-color: #4ecdc4; color: white;"
-          @click="verEquipo(row.item)">
-          Ver
-        </b-button>
-        <b-button size="sm" class="me-1" style="background-color: #c7f464; border-color: #c7f464; color: #333;"
-          @click="editarEquipo(row.item)">
-          Editar
-        </b-button>
-        <b-button size="sm" style="background-color: #ff6b6b; border-color: #ff6b6b; color: white;"
-          @click="eliminarEquipo(row.item)">
-          Eliminar
-        </b-button>
+        <div class="d-flex align-items-center acciones-botones">
+          <b-button size="sm" title="Ver" class="btn-icono" style="background-color: #4ecdc4; border-color: #4ecdc4;"
+            @click="verEquipo(row.item)">
+            <b-icon icon="eye-fill" font-scale="0.85" />
+          </b-button>
+          <b-button size="sm" title="Editar" class="btn-icono"
+            style="background-color: #c7f464; border-color: #c7f464; color: #333;" @click="editarEquipo(row.item)">
+            <b-icon icon="pencil-fill" font-scale="0.85" />
+          </b-button>
+          <b-button size="sm" title="Eliminar" class="btn-icono"
+            style="background-color: #ff6b6b; border-color: #ff6b6b;" @click="eliminarEquipo(row.item)">
+            <b-icon icon="trash-fill" font-scale="0.85" />
+          </b-button>
+        </div>
       </template>
+
     </b-table>
 
     <!-- Paginación -->
@@ -147,3 +150,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.acciones-botones>*:not(:last-child) {
+  margin-right: 6px;
+}
+
+.btn-icono {
+  padding: 0.25rem 0.4rem;
+  line-height: 1;
+  border-radius: 0.25rem;
+}
+</style>
