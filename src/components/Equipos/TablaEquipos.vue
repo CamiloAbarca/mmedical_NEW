@@ -36,20 +36,10 @@
     <!-- Tabla -->
     <b-table :items="paginatedEquipos" :fields="fields" responsive striped hover small>
       <template #cell(acciones)="row">
-        <div class="d-flex align-items-center acciones-botones">
-          <b-button size="sm" title="Ver" class="btn-icono" style="background-color: #4ecdc4; border-color: #4ecdc4;"
-            @click="verEquipo(row.item)">
-            <b-icon icon="eye-fill" font-scale="0.85" />
-          </b-button>
-          <b-button size="sm" title="Editar" class="btn-icono"
-            style="background-color: #c7f464; border-color: #c7f464; color: #333;" @click="editarEquipo(row.item)">
-            <b-icon icon="pencil-fill" font-scale="0.85" />
-          </b-button>
-          <b-button size="sm" title="Eliminar" class="btn-icono"
-            style="background-color: #ff6b6b; border-color: #ff6b6b;" @click="eliminarEquipo(row.item)">
-            <b-icon icon="trash-fill" font-scale="0.85" />
-          </b-button>
-        </div>
+        <b-button size="sm" title="Ver / Acciones" class="btn-icono"
+          style="background-color: #4ecdc4; border-color: #4ecdc4;" @click="abrirModal(row.item)">
+          <b-icon icon="receipt" font-scale="1" />
+        </b-button>
       </template>
 
     </b-table>
@@ -57,14 +47,26 @@
     <!-- Paginación -->
     <b-pagination v-model="paginaActual" :total-rows="equiposFiltrados.length" :per-page="porPagina" align="center"
       class="mt-3" pills variant="primary" />
+
+    <EquipoModal v-if="equipoSeleccionado" :equipo="equipoSeleccionado" @cerrar="cerrarModal" @editar="editarEquipo"
+      @eliminar="eliminarEquipo" />
+
   </div>
 </template>
 
 <script>
+import EquipoModal from '@/components/Equipos/EquipoModal.vue'
+
+
 export default {
   name: 'EquiposPage',
+  components: {
+    EquipoModal
+  },
   data() {
     return {
+      equipoSeleccionado: null,
+      mostrarModal: false,
       search: '',
       filterMarca: '',
       filterModelo: '',
@@ -136,17 +138,34 @@ export default {
     }
   },
   methods: {
-    verEquipo(equipo) {
-      alert(`Viendo equipo ID ${equipo.id}`)
+    abrirModal(equipo) {
+      this.equipoSeleccionado = equipo
+      this.mostrarModal = true
+      this.$root.$emit('bv::show::modal', 'modal-equipo')
     },
-    editarEquipo(equipo) {
-      alert(`Editando equipo ID ${equipo.id}`)
+
+    cerrarModal() {
+      this.mostrarModal = false
+      this.equipoSeleccionado = null
     },
+
+    editarEquipo(equipoActualizado) {
+      const index = this.equipos.findIndex(e => e.id === equipoActualizado.id)
+      if (index !== -1) {
+        this.equipos.splice(index, 1, equipoActualizado)
+      } else {
+        // Emitir evento para que el padre actualice nuevosEquipos
+        this.$emit('actualizar-nuevo-equipo', equipoActualizado)
+      }
+    },
+
     eliminarEquipo(equipo) {
       if (confirm(`¿Eliminar equipo ID ${equipo.id}?`)) {
         this.equipos = this.equipos.filter(e => e.id !== equipo.id)
+        this.cerrarModal()
       }
     }
+
   }
 }
 </script>
