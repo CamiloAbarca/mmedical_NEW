@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3 class="m-0">Clientes</h3>
-      <!-- Si quieres botón para agregar aquí, puedes agregarlo -->
-    </div>
+    <h3 class="text-primary mb-3">Clientes</h3>
 
     <!-- Filtros -->
     <b-row class="mb-3">
@@ -40,18 +37,27 @@
     <!-- Tabla -->
     <b-table :items="paginatedClientes" :fields="fields" responsive striped hover small class="mb-3">
       <template #cell(acciones)="row">
-        <b-button size="sm" variant="info" class="me-1" @click="verCliente(row.item)">Ver</b-button>
-        <b-button size="sm" variant="warning" class="me-1" @click="editarCliente(row.item)">Editar</b-button>
-        <b-button size="sm" variant="danger" @click="eliminarCliente(row.item)">Eliminar</b-button>
+        <b-button size="sm" variant="info" class="me-1" title="Ver Cliente" @click="verCliente(row.item)">
+          <b-icon icon="eye" font-scale="1" />
+        </b-button>
+        <b-button size="sm" variant="warning" class="me-1" title="Editar Cliente" @click="editarCliente(row.item)">
+          <b-icon icon="pencil" font-scale="1" />
+        </b-button>
+        <b-button size="sm" variant="danger" title="Eliminar Cliente" @click="eliminarCliente(row.item)">
+          <b-icon icon="trash" font-scale="1" />
+        </b-button>
       </template>
     </b-table>
 
     <!-- Paginación -->
-    <b-pagination v-model="paginaActual" :total-rows="clientesFiltrados.length" :per-page="porPagina" align="center" />
+    <b-pagination v-model="paginaActual" :total-rows="clientesFiltrados.length" :per-page="porPagina" align="center"
+      class="mt-3" pills variant="primary" />
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'ClientesPage',
   data() {
@@ -62,27 +68,6 @@ export default {
       filterCentro: '',
       paginaActual: 1,
       porPagina: 15,
-      clientes: [
-        {
-          id: 1,
-          razonSocial: 'Vidaintegra',
-          rut: '96.617.350-5',
-          email: 'cjaques@vidaintegra.cl',
-          fono: '996560489',
-          contacto: 'Cristobal Jaques',
-          centroMedico: 'Alameda',
-        },
-        {
-          id: 2,
-          razonSocial: 'Vidaintegra',
-          rut: '96.617.350-5',
-          email: 'iprecarchile@vidaintegra.cl',
-          fono: '923456791',
-          contacto: 'Ana Maria Ossandon',
-          centroMedico: 'Puente Alto',
-        },
-        // Agrega más registros según necesidad
-      ],
       fields: [
         { key: 'id', label: 'ID', sortable: true },
         { key: 'razonSocial', label: 'Razón Social', sortable: true },
@@ -92,8 +77,11 @@ export default {
         { key: 'contacto', label: 'Contacto', sortable: true },
         { key: 'centroMedico', label: 'Centro Médico', sortable: true },
         { key: 'acciones', label: 'Acciones' },
-      ],
+      ]
     }
+  },
+  created() {
+    this.cargarClientes()
   },
   props: {
     nuevosClientes: {
@@ -102,8 +90,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['obtenerClientes']),
     clientesTotales() {
-      return [...this.clientes, ...this.nuevosClientes]
+      return this.obtenerClientes
     },
     clientesFiltrados() {
       return this.clientesTotales.filter((e) => {
@@ -121,27 +110,30 @@ export default {
       return this.clientesFiltrados.slice(start, start + this.porPagina)
     },
     razonSocial() {
-      return [...new Set(this.clientes.map((e) => e.razonSocial))].sort()
+      return [...new Set(this.obtenerClientes.map((e) => e.razonSocial))].sort()
     },
     rut() {
-      return [...new Set(this.clientes.map((e) => e.rut))].sort()
+      return [...new Set(this.obtenerClientes.map((e) => e.rut))].sort()
     },
     centroMedico() {
-      return [...new Set(this.clientes.map((e) => e.centroMedico))].sort()
+      return [...new Set(this.obtenerClientes.map((e) => e.centroMedico))].sort()
     },
   },
   methods: {
+    ...mapActions(['cargarClientes', 'eliminarCliente', 'actualizarCliente']),
     verCliente(cliente) {
       alert(`Viendo cliente ID ${cliente.id}`)
     },
     editarCliente(cliente) {
-      alert(`Editando cliente ID ${cliente.id}`)
+      // Aquí podrías abrir un modal, o llamar a la acción de Vuex:
+      this.actualizarCliente(cliente)
     },
     eliminarCliente(cliente) {
       if (confirm(`¿Eliminar cliente ID ${cliente.id}?`)) {
-        this.clientes = this.clientes.filter((e) => e.id !== cliente.id)
+        this.eliminarCliente(cliente.id)
       }
     },
   },
+
 }
 </script>
