@@ -59,7 +59,7 @@ export default {
         { key: 'estado', label: 'Estado' }
       ],
       datosGrafico: {
-        labels: ['En Revisión', 'Facturado', 'Garantía', 'Despachado'],
+        labels: ['En Revisión', 'Facturado', 'Pronto a revisión', 'Necesitan revisión'],
         datasets: [
           {
             label: 'Equipos',
