@@ -44,6 +44,17 @@
     <b-pagination v-model="paginaActual" :total-rows="equiposFiltrados.length" :per-page="porPagina" align="center"
       class="mt-3" pills variant="primary" />
 
+    <b-alert v-if="alertaVisible && alertaTipo === 'actualizado'" variant="success" dismissible
+      @dismissed="alertaVisible = false">
+      ¡Equipo actualizado correctamente!
+    </b-alert>
+
+    <b-alert v-if="alertaVisible && alertaTipo === 'eliminado'" variant="danger" dismissible
+      @dismissed="alertaVisible = false">
+      ¡Equipo eliminado exitosamente!
+    </b-alert>
+
+
     <EquipoModal v-if="equipoSeleccionado" :equipo="equipoSeleccionado" @cerrar="cerrarModal" @editar="editarEquipo"
       @eliminar="eliminarEquipoSeleccionado" />
   </div>
@@ -60,6 +71,8 @@ export default {
   },
   data() {
     return {
+      alertaVisible: false,
+      alertaTipo: '',
       equipoSeleccionado: null,
       mostrarModal: false,
       search: '',

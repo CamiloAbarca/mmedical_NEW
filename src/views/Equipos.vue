@@ -51,6 +51,23 @@
               <b-form-invalid-feedback>Seleccione un modelo.</b-form-invalid-feedback>
             </b-form-group>
           </b-col>
+
+          <b-col md="6">
+            <b-form-group label="Estado" label-for="estado">
+              <b-form-select id="estado" v-model="form.estado" :state="validarCampo('estado')" required>
+                <template #first>
+                  <option disabled value="">-- Seleccione Estado --</option>
+                </template>
+                <option>En Revisión</option>
+                <option>Cotizado</option>
+                <option>OC Recibida</option>
+                <option>Despachado</option>
+                <option>Facturado</option>
+                <option>Garantía</option>
+              </b-form-select>
+              <b-form-invalid-feedback>Debe seleccionar un estado.</b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
         </b-row>
 
         <div v-if="form.tipo && form.marca && form.modelo">
@@ -64,24 +81,24 @@
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Estado" label-for="estado">
-                <b-form-select id="estado" v-model="form.estado" :state="validarCampo('estado')" required>
-                  <template #first>
-                    <option disabled value="">-- Seleccione Estado --</option>
-                  </template>
-                  <option>En Revisión</option>
-                  <option>Cotizado</option>
-                  <option>OC Recibida</option>
-                  <option>Despachado</option>
-                  <option>Facturado</option>
-                  <option>Garantía</option>
-                </b-form-select>
-                <b-form-invalid-feedback>Debe seleccionar un estado.</b-form-invalid-feedback>
+              <b-form-group label="Fecha Ingreso" label-for="fechaIngreso">
+                <b-form-input id="fechaIngreso" type="date" v-model="form.fechaIngreso"
+                  :state="validarCampo('fechaIngreso')" required />
+                <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
+
           </b-row>
 
           <b-row>
+            <b-col md="6">
+              <b-form-group label="Fecha Inicio Periodo" label-for="fechaPeriodo">
+                <b-form-input id="fechaPeriodo" type="date" v-model="form.fechaPeriodo"
+                  :state="validarCampo('fechaPeriodo')" required />
+                <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+
             <b-col md="6">
               <b-form-group label="Fecha Ingreso" label-for="fechaIngreso">
                 <b-form-input id="fechaIngreso" type="date" v-model="form.fechaIngreso"
@@ -90,13 +107,7 @@
               </b-form-group>
             </b-col>
 
-            <b-col md="6">
-              <b-form-group label="Fecha Entrega" label-for="fechaEntrega">
-                <b-form-input id="fechaEntrega" type="date" v-model="form.fechaEntrega"
-                  :state="validarCampo('fechaEntrega')" required />
-                <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
+
           </b-row>
 
           <b-row>
@@ -120,13 +131,15 @@
         </div>
 
         <div class="text-end mt-3">
-          <b-button type="submit" style="background-color: #c7f464; border-color: #c7f464; color: #333" class="me-2">
+          <b-button type="submit"
+            style="background-color: #c7f464; border-color: #c7f464; color: #333; margin-right: 8px;">
             Guardar
           </b-button>
           <b-button variant="danger" style="background-color: #ff6b6b; border-color: #ff6b6b" @click="cerrarModal">
             Cancelar
           </b-button>
         </div>
+
       </b-form>
     </b-modal>
   </div>
