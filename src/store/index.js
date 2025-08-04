@@ -72,6 +72,7 @@ export default new Vuex.Store({
           fechaPeriodo: "2025-04-01",
           accesorios: "Cable de poder",
           detalles: "Chequeo general",
+          id_cliente: 1
         },
         {
           id: 2,
@@ -85,6 +86,7 @@ export default new Vuex.Store({
           fechaPeriodo: "2025-04-01",
           accesorios: "Transductor",
           detalles: "Mantenimiento preventivo",
+          id_cliente: 2
         },
       ];
       commit("SET_EQUIPOS", equiposDummy);

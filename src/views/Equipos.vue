@@ -52,26 +52,41 @@
             </b-form-group>
           </b-col>
 
-          <b-col md="6">
-            <b-form-group label="Estado" label-for="estado">
-              <b-form-select id="estado" v-model="form.estado" :state="validarCampo('estado')" required>
-                <template #first>
-                  <option disabled value="">-- Seleccione Estado --</option>
-                </template>
-                <option>En Revisión</option>
-                <option>Cotizado</option>
-                <option>OC Recibida</option>
-                <option>Despachado</option>
-                <option>Facturado</option>
-                <option>Garantía</option>
-              </b-form-select>
-              <b-form-invalid-feedback>Debe seleccionar un estado.</b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
         </b-row>
 
         <div v-if="form.tipo && form.marca && form.modelo">
           <b-row>
+            <b-col md="6">
+              <b-form-group label="Estado" label-for="estado">
+                <b-form-select id="estado" v-model="form.estado" :state="validarCampo('estado')" required>
+                  <template #first>
+                    <option disabled value="">-- Seleccione Estado --</option>
+                  </template>
+                  <option>En Revisión</option>
+                  <option>Cotizado</option>
+                  <option>OC Recibida</option>
+                  <option>Despachado</option>
+                  <option>Facturado</option>
+                  <option>Garantía</option>
+                </b-form-select>
+                <b-form-invalid-feedback>Debe seleccionar un estado.</b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+
+            <b-col md="6">
+              <b-form-group label="Cliente Asociado" label-for="cliente">
+                <b-form-select id="cliente" v-model="form.id_cliente" :state="validarCampo('id_cliente')" required>
+                  <template #first>
+                    <option disabled value="">-- Seleccione Cliente --</option>
+                  </template>
+                  <option v-for="cliente in obtenerClientes" :key="cliente.id" :value="cliente.id">
+                    {{ cliente.razonSocial }} - {{ cliente.centroMedico }}
+                  </option>
+                </b-form-select>
+                <b-form-invalid-feedback>Debe seleccionar un cliente.</b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+
             <b-col md="6">
               <b-form-group label="Nro. de Serie" label-for="serie">
                 <b-form-input id="serie" v-model.trim="form.serie" :state="validarCampo('serie')" required
@@ -147,7 +162,7 @@
 
 <script>
 import TablaEquipos from '@/components/Equipos/TablaEquipos.vue'
-import { mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'EquiposView',
@@ -166,14 +181,15 @@ export default {
         fechaIngreso: '',
         fechaEntrega: '',
         accesorios: '',
-        detalles: ''
+        detalles: '',
+        id_cliente: ''
       },
       camposValidados: false
     }
   },
   computed: {
+    ...mapGetters(['obtenerClientes']),
     marcasDisponibles() {
-      //... (tu lógica original, no cambia)
       const marcasPorTipo = {
         Humano: [
           'Aerotel', 'Biester', 'BTL', 'Cardiocare', 'DATASCOPE', 'Econet', 'Enraf Nonius', 'IEM',
@@ -221,7 +237,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['agregarEquipo']),
+    ...mapActions(['agregarEquipo', 'cargarClientes']),
     validarCampo(campo) {
       if (!this.camposValidados) return null
       return this.form[campo] ? true : false
@@ -266,6 +282,12 @@ export default {
         detalles: ''
       }
     }
+  },
+  mounted() {
+    if (this.obtenerClientes.length === 0) {
+      this.cargarClientes()
+    }
   }
+
 }
 </script>
