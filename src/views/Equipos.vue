@@ -7,14 +7,11 @@
       </b-button>
     </div>
 
-    <!-- Tabla -->
-    <TablaEquipos :nuevos-equipos="nuevosEquipos" />
+    <TablaEquipos />
 
-    <!-- Modal -->
     <b-modal id="modal-agregar-equipo" v-model="mostrarModal" title="Agregar Nuevo Equipo" @hide="resetFormulario"
       hide-footer centered size="lg" :header-style="{ backgroundColor: '#556270', color: 'white' }">
       <b-form @submit.prevent="guardarEquipo" ref="form">
-        <!-- Tipo, Marca, Modelo -->
         <b-row>
           <b-col md="6">
             <b-form-group label="Tipo de Equipo" label-for="tipo">
@@ -56,7 +53,6 @@
           </b-col>
         </b-row>
 
-        <!-- Campos visibles solo si ya hay tipo, marca y modelo -->
         <div v-if="form.tipo && form.marca && form.modelo">
           <b-row>
             <b-col md="6">
@@ -115,16 +111,14 @@
 
             <b-col md="12">
               <b-form-group label="Detalles" label-for="detalles">
-                <b-form-textarea id="detalles" v-model="form.detalles"
-                  placeholder="Ej: Equipo con piezas sulfatadas." :state="validarCampo('detalles')" required
-                  rows="2" />
+                <b-form-textarea id="detalles" v-model="form.detalles" placeholder="Ej: Equipo con piezas sulfatadas."
+                  :state="validarCampo('detalles')" required rows="2" />
                 <b-form-invalid-feedback>Describa los accesorios.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
           </b-row>
         </div>
 
-        <!-- Botones -->
         <div class="text-end mt-3">
           <b-button type="submit" style="background-color: #c7f464; border-color: #c7f464; color: #333" class="me-2">
             Guardar
@@ -138,9 +132,9 @@
   </div>
 </template>
 
-
 <script>
 import TablaEquipos from '@/components/Equipos/TablaEquipos.vue'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'EquiposView',
@@ -150,7 +144,6 @@ export default {
   data() {
     return {
       mostrarModal: false,
-      nuevosEquipos: [],
       form: {
         tipo: '',
         marca: '',
@@ -167,6 +160,7 @@ export default {
   },
   computed: {
     marcasDisponibles() {
+      //... (tu lógica original, no cambia)
       const marcasPorTipo = {
         Humano: [
           'Aerotel', 'Biester', 'BTL', 'Cardiocare', 'DATASCOPE', 'Econet', 'Enraf Nonius', 'IEM',
@@ -178,6 +172,7 @@ export default {
       return this.form.tipo ? marcasPorTipo[this.form.tipo] : []
     },
     modelosDisponibles() {
+      //... (tu lógica original, no cambia)
       const modelos = {
         Humano: {
           Aerotel: ['HeartView 12 l'],
@@ -213,20 +208,29 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['agregarEquipo']),
     validarCampo(campo) {
       if (!this.camposValidados) return null
       return this.form[campo] ? true : false
     },
     guardarEquipo() {
       this.camposValidados = true
+      // Validar que todos los campos obligatorios estén completos
       const camposCompletos = Object.values(this.form).every(val => val)
-      if (!camposCompletos) return
+      if (!camposCompletos) {
+        return
+      }
 
+      // Crear el objeto del nuevo equipo
       const nuevo = {
-        id: Date.now(),
+        id: Date.now(), // ID único temporal
         ...this.form
       }
-      this.nuevosEquipos.push(nuevo)
+
+      // Usar la action de Vuex para agregar el equipo
+      this.agregarEquipo(nuevo)
+
+      // Cerrar el modal y resetear el formulario
       this.mostrarModal = false
       this.resetFormulario()
       this.camposValidados = false
@@ -245,7 +249,8 @@ export default {
         estado: '',
         fechaIngreso: '',
         fechaEntrega: '',
-        accesorios: ''
+        accesorios: '',
+        detalles: ''
       }
     }
   }

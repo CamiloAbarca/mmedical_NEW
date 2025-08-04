@@ -26,6 +26,7 @@ export default new Vuex.Store({
         (e) => e.id === equipoActualizado.id
       );
       if (index !== -1) {
+        // Usa Vue.set para asegurar la reactividad
         Vue.set(state.equipos, index, equipoActualizado);
       }
     },
@@ -39,31 +40,27 @@ export default new Vuex.Store({
       const equiposDummy = [
         {
           id: 1,
-          marca: "GE",
+          tipo: "Humano",
+          marca: "GEx",
           modelo: "X200",
-          nro_serie: "ABC123",
-          estado: "revision",
-          tipo: "humano",
-          fecha_ingreso: "2025-01-10",
-          fecha_mantencion: "2025-03-01",
-          fecha_entrega: "2025-04-01",
-          detalle: "Chequeo general",
-          otroDetalle: "Conector flojo",
+          serie: "ABC123",
+          estado: "En Revisión",
+          fechaIngreso: "2025-01-10",
+          fechaEntrega: "2025-04-01",
           accesorios: "Cable de poder",
+          detalles: "Chequeo general",
         },
         {
           id: 2,
+          tipo: "Veterinario",
           marca: "Philips",
           modelo: "UltraScan",
-          nro_serie: "XYZ456",
-          estado: "facturado",
-          tipo: "veterinario",
-          fecha_ingreso: "2025-04-01",
-          fecha_mantencion: "2025-05-10",
-          fecha_entrega: "2025-06-15",
-          detalle: "Mantenimiento preventivo",
-          otroDetalle: "",
+          serie: "XYZ456",
+          estado: "Facturado",
+          fechaIngreso: "2025-04-01",
+          fechaEntrega: "2025-06-15",
           accesorios: "Transductor",
+          detalles: "Mantenimiento preventivo",
         },
       ];
       commit("SET_EQUIPOS", equiposDummy);

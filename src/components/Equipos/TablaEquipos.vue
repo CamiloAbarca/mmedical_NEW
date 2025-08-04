@@ -2,7 +2,6 @@
   <div>
     <h3 class="text-primary mb-3">Equipos</h3>
 
-    <!-- Filtros -->
     <b-row class="mb-3">
       <b-col md="3">
         <b-form-input v-model="search" placeholder="Buscar por ID, Marca, Modelo, Serie" />
@@ -33,7 +32,6 @@
       </b-col>
     </b-row>
 
-    <!-- Tabla -->
     <b-table :items="paginatedEquipos" :fields="fields" responsive striped hover small>
       <template #cell(acciones)="row">
         <b-button size="sm" title="Ver / Acciones" class="btn-icono"
@@ -43,19 +41,17 @@
       </template>
 
     </b-table>
-    <!-- Paginación -->
     <b-pagination v-model="paginaActual" :total-rows="equiposFiltrados.length" :per-page="porPagina" align="center"
       class="mt-3" pills variant="primary" />
 
     <EquipoModal v-if="equipoSeleccionado" :equipo="equipoSeleccionado" @cerrar="cerrarModal" @editar="editarEquipo"
-      @eliminar="eliminarEquipo" />
-
+      @eliminar="eliminarEquipoSeleccionado" />
   </div>
 </template>
 
 <script>
 import EquipoModal from '@/components/Equipos/EquipoModal.vue'
-
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'EquiposPage',
@@ -72,44 +68,27 @@ export default {
       filterEstado: '',
       paginaActual: 1,
       porPagina: 15,
-      equipos: [
-        {
-          id: 1,
-          serie: 'ABC123',
-          marca: 'GE',
-          modelo: 'X200',
-          revision: '2025-01-10',
-          estado: 'Activo'
-        },
-        {
-          id: 2,
-          serie: 'XYZ456',
-          marca: 'Philips',
-          modelo: 'UltraScan',
-          revision: '2025-04-01',
-          estado: 'Inactivo'
-        }
-      ],
       fields: [
         { key: 'id', label: 'ID', sortable: true },
         { key: 'serie', label: 'Nro de Serie', sortable: true },
         { key: 'marca', label: 'Marca', sortable: true },
         { key: 'modelo', label: 'Modelo', sortable: true },
-        { key: 'revision', label: 'Fecha de Revisión', sortable: true },
+        { key: 'fechaIngreso', label: 'Fecha de Ingreso', sortable: true },
         { key: 'estado', label: 'Estado', sortable: true },
         { key: 'acciones', label: 'Acciones' }
       ]
     }
   },
-  props: {
-    nuevosEquipos: {
-      type: Array,
-      default: () => []
-    }
+  // No se necesita el prop `nuevosEquipos`
+  created() {
+    // Cargar los equipos iniciales al crear el componente
+    this.cargarEquipos()
   },
   computed: {
+    ...mapGetters(['obtenerEquipos']),
     equiposTotales() {
-      return [...this.equipos, ...this.nuevosEquipos]
+      // Ahora se obtienen todos los equipos del store
+      return this.obtenerEquipos
     },
     equiposFiltrados() {
       return this.equiposTotales.filter(e => {
@@ -127,50 +106,37 @@ export default {
       return this.equiposFiltrados.slice(start, start + this.porPagina)
     },
     marcas() {
-      return [...new Set(this.equipos.map(e => e.marca))].sort()
+      return [...new Set(this.obtenerEquipos.map(e => e.marca))].sort()
     },
     modelos() {
-      return [...new Set(this.equipos.map(e => e.modelo))].sort()
+      return [...new Set(this.obtenerEquipos.map(e => e.modelo))].sort()
     },
     estados() {
-      return [...new Set(this.equipos.map(e => e.estado))].sort()
+      return [...new Set(this.obtenerEquipos.map(e => e.estado))].sort()
     }
   },
   methods: {
+    ...mapActions(['cargarEquipos', 'actualizarEquipo', 'eliminarEquipo']),
     abrirModal(equipo) {
       this.equipoSeleccionado = equipo
       this.mostrarModal = true
       this.$root.$emit('bv::show::modal', 'modal-equipo')
     },
-
     cerrarModal() {
       this.mostrarModal = false
       this.equipoSeleccionado = null
     },
-
     editarEquipo(equipo) {
-      alert(`Editando equipo ID ${equipo.id}`)
+      // Usar la action de Vuex para actualizar el equipo
+      this.actualizarEquipo(equipo)
+      this.cerrarModal()
     },
-
-    eliminarEquipo(equipo) {
+    eliminarEquipoSeleccionado(equipo) {
       if (confirm(`¿Eliminar equipo ID ${equipo.id}?`)) {
-        this.equipos = this.equipos.filter(e => e.id !== equipo.id)
+        this.$store.dispatch('eliminarEquipo', equipo.id)
         this.cerrarModal()
       }
     }
-
   }
 }
 </script>
-
-<style scoped>
-.acciones-botones>*:not(:last-child) {
-  margin-right: 6px;
-}
-
-.btn-icono {
-  padding: 0.25rem 0.4rem;
-  line-height: 1;
-  border-radius: 0.25rem;
-}
-</style>

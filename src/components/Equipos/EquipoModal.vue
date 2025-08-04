@@ -28,28 +28,45 @@
                     </b-col>
 
                     <b-col md="6" class="mb-3">
-                        <b-form-group label="Fecha de Revisión" label-for="revision">
-                            <b-form-input id="revision" type="date" v-model="editableEquipo.revision" />
-                        </b-form-group>
-                    </b-col>
-
-                    <b-col md="6" class="mb-3">
                         <b-form-group label="Estado" label-for="estado">
                             <b-form-select id="estado" v-model="editableEquipo.estado" :options="estadoOpciones" />
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col md="6" class="mb-3">
+                        <b-form-group label="Fecha Ingreso" label-for="fechaIngreso">
+                            <b-form-input id="fechaIngreso" type="date" v-model="editableEquipo.fechaIngreso" />
+                        </b-form-group>
+                    </b-col>
+                    <b-col md="6" class="mb-3">
+                        <b-form-group label="Fecha Entrega" label-for="fechaEntrega">
+                            <b-form-input id="fechaEntrega" type="date" v-model="editableEquipo.fechaEntrega" />
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col md="12" class="mb-3">
+                        <b-form-group label="Accesorios" label-for="accesorios">
+                            <b-form-textarea id="accesorios" v-model="editableEquipo.accesorios" rows="2" />
+                        </b-form-group>
+                    </b-col>
+                    <b-col md="12" class="mb-3">
+                        <b-form-group label="Detalles" label-for="detalles">
+                            <b-form-textarea id="detalles" v-model="editableEquipo.detalles" rows="2" />
                         </b-form-group>
                     </b-col>
                 </b-row>
 
                 <hr />
                 <div class="d-flex justify-content-end">
-                    <b-button variant="success" type="submit" class="mr-2">Guardar</b-button>
-                    <b-button variant="danger" @click="$emit('eliminar', editableEquipo)">Eliminar</b-button>
+                    <b-button variant="success" type="submit" class="mr-2">Guardar cambios</b-button>
+                    <b-button variant="danger" @click="$emit('eliminar', editableEquipo)">Eliminar equipo</b-button>
                 </div>
             </b-form>
         </b-container>
     </b-modal>
 </template>
-
 
 <script>
 export default {
@@ -64,7 +81,14 @@ export default {
     data() {
         return {
             editableEquipo: { ...this.equipo },
-            estadoOpciones: ['Activo', 'Inactivo', 'En Reparación']
+            estadoOpciones: [
+                'En Revisión',
+                'Cotizado',
+                'OC Recibida',
+                'Despachado',
+                'Facturado',
+                'Garantía'
+            ]
         }
     },
     watch: {
