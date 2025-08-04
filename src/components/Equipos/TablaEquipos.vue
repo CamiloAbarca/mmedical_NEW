@@ -69,13 +69,13 @@ export default {
       paginaActual: 1,
       porPagina: 15,
       fields: [
-        { key: 'id', label: 'ID', sortable: true },
-        { key: 'serie', label: 'Nro de Serie', sortable: true },
-        { key: 'marca', label: 'Marca', sortable: true },
-        { key: 'modelo', label: 'Modelo', sortable: true },
-        { key: 'fechaIngreso', label: 'Fecha de Ingreso', sortable: true },
-        { key: 'estado', label: 'Estado', sortable: true },
-        { key: 'acciones', label: 'Acciones' }
+        { key: 'id', label: 'ID', sortable: true, class: 'text-center' },
+        { key: 'serie', label: 'Nro de Serie', sortable: true, class: 'text-center' },
+        { key: 'marca', label: 'Marca', sortable: true, class: 'text-center' },
+        { key: 'modelo', label: 'Modelo', sortable: true, class: 'text-center' },
+        { key: 'fechaMantencion', label: 'Fecha de Mantención', sortable: true, class: 'text-center' },
+        { key: 'estado', label: 'Estado', sortable: true, class: 'text-center' },
+        { key: 'acciones', label: 'Acciones', class: 'text-center' }
       ]
     }
   },
@@ -91,15 +91,32 @@ export default {
       return this.obtenerEquipos
     },
     equiposFiltrados() {
-      return this.equiposTotales.filter(e => {
-        const texto = `${e.id} ${e.marca} ${e.modelo} ${e.serie}`.toLowerCase()
-        return (
-          texto.includes(this.search.toLowerCase()) &&
-          (this.filterMarca ? e.marca === this.filterMarca : true) &&
-          (this.filterModelo ? e.modelo === this.filterModelo : true) &&
-          (this.filterEstado ? e.estado === this.filterEstado : true)
-        )
-      })
+      return this.equiposTotales
+        .filter(e => {
+          const texto = `${e.id} ${e.marca} ${e.modelo} ${e.serie}`.toLowerCase()
+          return (
+            texto.includes(this.search.toLowerCase()) &&
+            (this.filterMarca ? e.marca === this.filterMarca : true) &&
+            (this.filterModelo ? e.modelo === this.filterModelo : true) &&
+            (this.filterEstado ? e.estado === this.filterEstado : true)
+          )
+        })
+        .map(e => {
+          // Copiamos el equipo y calculamos la fecha de mantención
+          const fechaPeriodo = new Date(e.fechaPeriodo)
+          const fechaMantencion = new Date(fechaPeriodo)
+          fechaMantencion.setFullYear(fechaPeriodo.getFullYear() + 1)
+
+          // Formateamos como yyyy-mm-dd
+          const yyyy = fechaMantencion.getFullYear()
+          const mm = String(fechaMantencion.getMonth() + 1).padStart(2, '0')
+          const dd = String(fechaMantencion.getDate()).padStart(2, '0')
+
+          return {
+            ...e,
+            fechaMantencion: `${yyyy}-${mm}-${dd}`
+          }
+        })
     },
     paginatedEquipos() {
       const start = (this.paginaActual - 1) * this.porPagina

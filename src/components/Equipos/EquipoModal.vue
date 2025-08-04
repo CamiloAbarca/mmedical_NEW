@@ -4,54 +4,37 @@
             <b-form @submit.prevent="guardarCambios">
                 <b-row>
                     <b-col md="6" class="mb-3">
-                        <b-form-group label="ID" label-for="id">
-                            <b-form-input id="id" v-model="editableEquipo.id" disabled />
-                        </b-form-group>
-                    </b-col>
-
-                    <b-col md="6" class="mb-3">
-                        <b-form-group label="Marca" label-for="marca">
-                            <b-form-input id="marca" v-model="editableEquipo.marca" />
-                        </b-form-group>
-                    </b-col>
-
-                    <b-col md="6" class="mb-3">
-                        <b-form-group label="Modelo" label-for="modelo">
-                            <b-form-input id="modelo" v-model="editableEquipo.modelo" />
-                        </b-form-group>
-                    </b-col>
-
-                    <b-col md="6" class="mb-3">
-                        <b-form-group label="Serie" label-for="serie">
-                            <b-form-input id="serie" v-model="editableEquipo.serie" />
-                        </b-form-group>
-                    </b-col>
-
-                    <b-col md="6" class="mb-3">
                         <b-form-group label="Estado" label-for="estado">
                             <b-form-select id="estado" v-model="editableEquipo.estado" :options="estadoOpciones" />
                         </b-form-group>
                     </b-col>
-                </b-row>
-                <b-row>
+
                     <b-col md="6" class="mb-3">
-                        <b-form-group label="Fecha Ingreso" label-for="fechaIngreso">
-                            <b-form-input id="fechaIngreso" type="date" v-model="editableEquipo.fechaIngreso" />
+                        <b-form-group label="Fecha inicio de Periodo" label-for="fechaPeriodo">
+                            <b-form-input id="fechaPeriodo" type="date" v-model="editableEquipo.fechaPeriodo" />
                         </b-form-group>
                     </b-col>
+
                     <b-col md="6" class="mb-3">
                         <b-form-group label="Fecha Entrega" label-for="fechaEntrega">
                             <b-form-input id="fechaEntrega" type="date" v-model="editableEquipo.fechaEntrega" />
                         </b-form-group>
                     </b-col>
-                </b-row>
-                <b-row>
-                    <b-col md="12" class="mb-3">
+
+                    <b-col md="6" class="mb-3">
+                        <b-form-group label="Fecha Mantención" label-for="fechaMantencion">
+                            <p class="font-weight-bold mb-0">{{ editableEquipo.fechaMantencion }}</p>
+                        </b-form-group>
+                    </b-col>
+
+
+                    <b-col md="6" class="mb-3">
                         <b-form-group label="Accesorios" label-for="accesorios">
                             <b-form-textarea id="accesorios" v-model="editableEquipo.accesorios" rows="2" />
                         </b-form-group>
                     </b-col>
-                    <b-col md="12" class="mb-3">
+
+                    <b-col md="6" class="mb-3">
                         <b-form-group label="Detalles" label-for="detalles">
                             <b-form-textarea id="detalles" v-model="editableEquipo.detalles" rows="2" />
                         </b-form-group>
@@ -67,6 +50,7 @@
         </b-container>
     </b-modal>
 </template>
+
 
 <script>
 export default {
@@ -95,15 +79,33 @@ export default {
         equipo: {
             handler(nuevo) {
                 this.editableEquipo = { ...nuevo }
+                this.actualizarFechaMantencion()
             },
             immediate: true
+        },
+        'editableEquipo.fechaPeriodo'() {
+            this.actualizarFechaMantencion()
         }
     },
     methods: {
         guardarCambios() {
+            this.actualizarFechaMantencion()
             this.$emit('editar', this.editableEquipo)
             this.$emit('cerrar')
             this.$root.$emit('bv::hide::modal', this.modalId)
+        },
+        actualizarFechaMantencion() {
+            if (!this.editableEquipo.fechaPeriodo) return
+
+            const fechaPeriodo = new Date(this.editableEquipo.fechaPeriodo)
+            const fechaMantencion = new Date(fechaPeriodo)
+            fechaMantencion.setFullYear(fechaPeriodo.getFullYear() + 1)
+
+            const yyyy = fechaMantencion.getFullYear()
+            const mm = String(fechaMantencion.getMonth() + 1).padStart(2, '0')
+            const dd = String(fechaMantencion.getDate()).padStart(2, '0')
+
+            this.editableEquipo.fechaMantencion = `${dd}/${mm}/${yyyy}`
         }
     }
 }
