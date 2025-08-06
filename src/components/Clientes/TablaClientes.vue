@@ -2,13 +2,11 @@
   <div>
     <h3 class="text-primary mb-3">Clientes</h3>
 
-    <!-- Filtros -->
     <b-row class="mb-3">
       <b-col md="3">
         <b-form-input v-model="search" placeholder="Buscar por Razón Social, RUT, Contacto, Centro Médico"
           class="mb-2" />
       </b-col>
-
       <b-col md="3">
         <b-form-select v-model="filterRazon" :options="razonSocial" class="mb-2">
           <template #first>
@@ -16,7 +14,6 @@
           </template>
         </b-form-select>
       </b-col>
-
       <b-col md="3">
         <b-form-select v-model="filterRut" :options="rut" class="mb-2">
           <template #first>
@@ -24,7 +21,6 @@
           </template>
         </b-form-select>
       </b-col>
-
       <b-col md="3">
         <b-form-select v-model="filterCentro" :options="centroMedico" class="mb-2">
           <template #first>
@@ -34,34 +30,36 @@
       </b-col>
     </b-row>
 
-    <!-- Tabla -->
     <b-table :items="paginatedClientes" :fields="fields" responsive striped hover small class="mb-3">
       <template #cell(acciones)="row">
-        <b-button size="sm" variant="info" class="me-1" title="Ver Cliente" @click="verCliente(row.item)">
-          <b-icon icon="eye" font-scale="1" />
-        </b-button>
-        <b-button size="sm" variant="warning" class="me-1" title="Editar Cliente" @click="editarCliente(row.item)">
-          <b-icon icon="pencil" font-scale="1" />
-        </b-button>
-        <b-button size="sm" variant="danger" title="Eliminar Cliente" @click="eliminarCliente(row.item)">
-          <b-icon icon="trash" font-scale="1" />
+        <b-button size="sm" title="Ver / Acciones" class="btn-icono"
+          style="background-color: #4ecdc4; border-color: #4ecdc4;" @click="abrirModal(row.item)">
+          <b-icon icon="gear" font-scale="1" />
         </b-button>
       </template>
     </b-table>
 
-    <!-- Paginación -->
     <b-pagination v-model="paginaActual" :total-rows="clientesFiltrados.length" :per-page="porPagina" align="center"
       class="mt-3" pills variant="primary" />
+
+    <ClienteModal v-if="clienteSeleccionado" :cliente="clienteSeleccionado" @cerrar="cerrarModal"
+      @editar="editarCliente" @eliminar="eliminarCliente" />
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'vuex';
+import ClienteModal from './ClienteModal.vue';
 
 export default {
-  name: 'ClientesPage',
+  name: 'TablaClientes',
+  components: {
+    ClienteModal,
+  },
   data() {
     return {
+      clienteSeleccionado: null,
+      mostrarModal: false,
       search: '',
       filterRazon: '',
       filterRut: '',
@@ -77,63 +75,72 @@ export default {
         { key: 'contacto', label: 'Contacto', sortable: true },
         { key: 'centroMedico', label: 'Centro Médico', sortable: true },
         { key: 'acciones', label: 'Acciones' },
-      ]
-    }
+      ],
+    };
   },
   created() {
-    this.cargarClientes()
-  },
-  props: {
-    nuevosClientes: {
-      type: Array,
-      default: () => [],
-    },
+    this.cargarClientes();
   },
   computed: {
     ...mapGetters(['obtenerClientes']),
     clientesTotales() {
-      return this.obtenerClientes
+      return this.obtenerClientes;
     },
     clientesFiltrados() {
       return this.clientesTotales.filter((e) => {
-        const texto = `${e.id} ${e.razonSocial} ${e.rut} ${e.contacto} ${e.centroMedico}`.toLowerCase()
+        const texto = `${e.id} ${e.razonSocial} ${e.rut} ${e.contacto} ${e.centroMedico}`.toLowerCase();
         return (
           texto.includes(this.search.toLowerCase()) &&
           (this.filterRazon ? e.razonSocial === this.filterRazon : true) &&
           (this.filterRut ? e.rut === this.filterRut : true) &&
           (this.filterCentro ? e.centroMedico === this.filterCentro : true)
-        )
-      })
+        );
+      });
     },
     paginatedClientes() {
-      const start = (this.paginaActual - 1) * this.porPagina
-      return this.clientesFiltrados.slice(start, start + this.porPagina)
+      const start = (this.paginaActual - 1) * this.porPagina;
+      return this.clientesFiltrados.slice(start, start + this.porPagina);
     },
     razonSocial() {
-      return [...new Set(this.obtenerClientes.map((e) => e.razonSocial))].sort()
+      return [...new Set(this.obtenerClientes.map((e) => e.razonSocial))].sort();
     },
     rut() {
-      return [...new Set(this.obtenerClientes.map((e) => e.rut))].sort()
+      return [...new Set(this.obtenerClientes.map((e) => e.rut))].sort();
     },
     centroMedico() {
-      return [...new Set(this.obtenerClientes.map((e) => e.centroMedico))].sort()
+      return [...new Set(this.obtenerClientes.map((e) => e.centroMedico))].sort();
     },
   },
   methods: {
     ...mapActions(['cargarClientes', 'eliminarCliente', 'actualizarCliente']),
-    verCliente(cliente) {
-      alert(`Viendo cliente ID ${cliente.id}`)
+    abrirModal(cliente) {
+      this.clienteSeleccionado = cliente;
+      this.$root.$emit('bv::show::modal', 'modal-cliente');
     },
-    editarCliente(cliente) {
-      // Aquí podrías abrir un modal, o llamar a la acción de Vuex:
-      this.actualizarCliente(cliente)
+    cerrarModal() {
+      this.clienteSeleccionado = null;
+      this.$root.$emit('bv::hide::modal', 'modal-cliente');
     },
-    eliminarCliente(cliente) {
-      if (confirm(`¿Eliminar cliente ID ${cliente.id}?`)) {
-        this.eliminarCliente(cliente.id)
+    async editarCliente(cliente) {
+      try {
+        await this.actualizarCliente(cliente);
+        await this.cargarClientes();
+        this.cerrarModal();
+      } catch (error) {
+        console.error('Error al editar cliente:', error);
+      }
+    },
+    async eliminarCliente(id) {
+      if (confirm(`¿Eliminar cliente ID ${id}?`)) {
+        try {
+          await this.$store.dispatch('eliminarCliente', id);
+          await this.cargarClientes();
+          this.cerrarModal();
+        } catch (error) {
+          console.error('Error al eliminar cliente:', error);
+        }
       }
     },
   },
-
-}
+};
 </script>

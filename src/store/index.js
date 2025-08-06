@@ -188,7 +188,7 @@ export default new Vuex.Store({
       }
     },
 
-    // Cargar clientes (puede usar dummy si quieres)
+    // Cargar clientes (se eliminó la lógica con dummy)
     async cargarClientes({ commit }) {
       try {
         const token = localStorage.getItem("token");
@@ -201,31 +201,13 @@ export default new Vuex.Store({
         const data = await response.json();
         commit("SET_CLIENTES", data);
       } catch (error) {
-        console.error("Fetch clientes fallo, usando dummy:", error);
-        const clientesDummy = [
-          {
-            id: 1,
-            razonSocial: "Vidaintegra",
-            rut: "96.617.350-5",
-            email: "cjaques@vidaintegra.cl",
-            fono: "996560489",
-            contacto: "Cristobal Jaques",
-            centroMedico: "Alameda",
-          },
-          {
-            id: 2,
-            razonSocial: "Vidaintegra",
-            rut: "96.617.350-5",
-            email: "iprecarchile@vidaintegra.cl",
-            fono: "923456791",
-            contacto: "Ana Maria Ossandon",
-            centroMedico: "Puente Alto",
-          },
-        ];
-        commit("SET_CLIENTES", clientesDummy);
+        console.error("Error al cargar clientes:", error);
+        // Puedes decidir si quieres mantener los datos dummy o dejarlo vacío en caso de error
+        commit("SET_CLIENTES", []);
       }
     },
 
+    // Agregar cliente (POST API)
     async agregarCliente({ commit }, cliente) {
       try {
         const token = localStorage.getItem("token");
@@ -245,6 +227,7 @@ export default new Vuex.Store({
       }
     },
 
+    // Actualizar cliente (PUT API)
     async actualizarCliente({ commit }, cliente) {
       try {
         const token = localStorage.getItem("token");
@@ -268,6 +251,7 @@ export default new Vuex.Store({
       }
     },
 
+    // Eliminar cliente (DELETE API)
     async eliminarCliente({ commit }, id) {
       try {
         const token = localStorage.getItem("token");
