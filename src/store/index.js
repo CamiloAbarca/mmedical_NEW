@@ -57,82 +57,175 @@ export default new Vuex.Store({
   },
 
   actions: {
-    // Equipos
-    cargarEquipos({ commit }) {
-      const equiposDummy = [
-        {
-          id: 1,
-          tipo: "Humano",
-          marca: "GE",
-          modelo: "X200",
-          serie: "ABC123",
-          estado: "En Revisión",
-          fechaIngreso: "2025-01-10",
-          fechaEntrega: "2025-04-01",
-          fechaPeriodo: "2025-04-01",
-          accesorios: "Cable de poder",
-          detalles: "Chequeo general",
-          id_cliente: 1
-        },
-        {
-          id: 2,
-          tipo: "Veterinario",
-          marca: "Philips",
-          modelo: "UltraScan",
-          serie: "XYZ456",
-          estado: "Facturado",
-          fechaIngreso: "2025-04-01",
-          fechaEntrega: "2025-06-15",
-          fechaPeriodo: "2025-04-01",
-          accesorios: "Transductor",
-          detalles: "Mantenimiento preventivo",
-          id_cliente: 2
-        },
-      ];
-      commit("SET_EQUIPOS", equiposDummy);
-    },
-    agregarEquipo({ commit }, equipo) {
-      commit("ADD_EQUIPO", equipo);
-    },
-    actualizarEquipo({ commit }, equipo) {
-      commit("UPDATE_EQUIPO", equipo);
-    },
-    eliminarEquipo({ commit }, id) {
-      commit("DELETE_EQUIPO", id);
+    // Cargar equipos solo desde API, sin dummy
+    async cargarEquipos({ commit }) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/equipos", {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) throw new Error("Error al cargar equipos");
+        const data = await response.json();
+        commit("SET_EQUIPOS", data);
+      } catch (error) {
+        console.error("Error al cargar equipos desde API:", error);
+        commit("SET_EQUIPOS", []); // o podrías no hacer commit y dejar el estado intacto
+      }
     },
 
-    // ✅ Clientes (aquí es donde deben estar)
-    cargarClientes({ commit }) {
-      const clientesDummy = [
-        {
-          id: 1,
-          razonSocial: "Vidaintegra",
-          rut: "96.617.350-5",
-          email: "cjaques@vidaintegra.cl",
-          fono: "996560489",
-          contacto: "Cristobal Jaques",
-          centroMedico: "Alameda",
-        },
-        {
-          id: 2,
-          razonSocial: "Vidaintegra",
-          rut: "96.617.350-5",
-          email: "iprecarchile@vidaintegra.cl",
-          fono: "923456791",
-          contacto: "Ana Maria Ossandon",
-          centroMedico: "Puente Alto",
-        },
-      ];
-      commit("SET_CLIENTES", clientesDummy);
+    // Agregar equipo (POST API)
+    async agregarEquipo({ commit }, equipo) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/equipos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify(equipo),
+        });
+        if (!response.ok) throw new Error("Error al agregar equipo");
+        const nuevoEquipo = await response.json();
+        commit("ADD_EQUIPO", nuevoEquipo);
+      } catch (error) {
+        console.error(error);
+      }
     },
-    agregarCliente({ commit }, cliente) {
-      commit("ADD_CLIENTE", cliente);
+
+    // Actualizar equipo (PUT API)
+    async actualizarEquipo({ commit }, equipo) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:3000/api/equipos/${equipo.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify(equipo),
+        });
+        if (!response.ok) throw new Error("Error al actualizar equipo");
+        const equipoActualizado = await response.json();
+        commit("UPDATE_EQUIPO", equipoActualizado);
+      } catch (error) {
+        console.error(error);
+        commit("UPDATE_EQUIPO", equipo); // Opcional: actualizar localmente igual
+      }
     },
-    actualizarCliente({ commit }, cliente) {
-      commit("UPDATE_CLIENTE", cliente);
+
+    // Eliminar equipo (DELETE API)
+    async eliminarEquipo({ commit }, id) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:3000/api/equipos/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) throw new Error("Error al eliminar equipo");
+        commit("DELETE_EQUIPO", id);
+      } catch (error) {
+        console.error(error);
+        commit("DELETE_EQUIPO", id); // Opcional: eliminar localmente igual
+      }
     },
-    eliminarCliente({ commit }, id) {
-      commit("DELETE_CLIENTE", id);
+
+    // Cargar clientes (puede usar dummy si quieres)
+    async cargarClientes({ commit }) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/clientes", {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) throw new Error("Error al cargar clientes");
+        const data = await response.json();
+        commit("SET_CLIENTES", data);
+      } catch (error) {
+        console.error("Fetch clientes fallo, usando dummy:", error);
+        const clientesDummy = [
+          {
+            id: 1,
+            razonSocial: "Vidaintegra",
+            rut: "96.617.350-5",
+            email: "cjaques@vidaintegra.cl",
+            fono: "996560489",
+            contacto: "Cristobal Jaques",
+            centroMedico: "Alameda",
+          },
+          {
+            id: 2,
+            razonSocial: "Vidaintegra",
+            rut: "96.617.350-5",
+            email: "iprecarchile@vidaintegra.cl",
+            fono: "923456791",
+            contacto: "Ana Maria Ossandon",
+            centroMedico: "Puente Alto",
+          },
+        ];
+        commit("SET_CLIENTES", clientesDummy);
+      }
+    },
+
+    async agregarCliente({ commit }, cliente) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/clientes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify(cliente),
+        });
+        if (!response.ok) throw new Error("Error al agregar cliente");
+        const nuevoCliente = await response.json();
+        commit("ADD_CLIENTE", nuevoCliente);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async actualizarCliente({ commit }, cliente) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:3000/api/clientes/${cliente.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify(cliente),
+        });
+        if (!response.ok) throw new Error("Error al actualizar cliente");
+        const clienteActualizado = await response.json();
+        commit("UPDATE_CLIENTE", clienteActualizado);
+      } catch (error) {
+        console.error(error);
+        commit("UPDATE_CLIENTE", cliente);
+      }
+    },
+
+    async eliminarCliente({ commit }, id) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:3000/api/clientes/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) throw new Error("Error al eliminar cliente");
+        commit("DELETE_CLIENTE", id);
+      } catch (error) {
+        console.error(error);
+        commit("DELETE_CLIENTE", id);
+      }
     },
   },
 });

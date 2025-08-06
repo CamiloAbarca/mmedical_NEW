@@ -1,43 +1,55 @@
 <template>
     <div>
+        <!-- Modal Principal -->
         <b-modal :id="modalId" title="Acciones" @hide="$emit('cerrar')" size="xl" ok-only>
             <b-container fluid>
                 <b-form @submit.prevent="guardarCambios">
                     <b-row>
+                        <!-- Estado -->
                         <b-col md="6" class="mb-3">
                             <b-form-group label="Estado" label-for="estado">
                                 <b-form-select id="estado" v-model="editableEquipo.estado" :options="estadoOpciones" />
                             </b-form-group>
                         </b-col>
 
+                        <!-- Fecha Mantención -->
                         <b-col md="6" class="mb-3">
-                            <b-form-group label="Fecha inicio de Periodo" label-for="fechaPeriodo">
-                                <b-form-input id="fechaPeriodo" type="date" v-model="editableEquipo.fechaPeriodo" />
+                            <b-form-group label="Fecha Mantención" label-for="fecha_mantencion">
+                                <p class="font-weight-bold mb-0">{{ editableEquipo.fecha_mantencion }}</p>
                             </b-form-group>
                         </b-col>
 
+                        <!-- Fecha Periodo -->
                         <b-col md="6" class="mb-3">
-                            <b-form-group label="Fecha Entrega" label-for="fechaEntrega">
-                                <b-form-input id="fechaEntrega" type="date" v-model="editableEquipo.fechaEntrega" />
+                            <b-form-group label="Fecha Periodo actual" label-for="fecha_periodo">
+                                <p class="font-weight-bold mb-0">{{ formatearFecha(editableEquipo.fecha_periodo) }}</p>
+                            </b-form-group>
+                            <b-form-group label="Nueva Fecha inicio de Periodo" label-for="fecha_periodo">
+                                <b-form-input id="fecha_periodo" type="date" v-model="editableEquipo.fecha_periodo" />
                             </b-form-group>
                         </b-col>
 
+                        <!-- Fecha Entrega -->
                         <b-col md="6" class="mb-3">
-                            <b-form-group label="Fecha Mantención" label-for="fechaMantencion">
-                                <p class="font-weight-bold mb-0">{{ editableEquipo.fechaMantencion }}</p>
+                            <b-form-group label="Fecha Entrega actual" label-for="fecha_entrega">
+                                <p class="font-weight-bold mb-0">{{ formatearFecha(editableEquipo.fecha_entrega) }}</p>
+                            </b-form-group>
+                            <b-form-group label="Nueva Fecha Entrega" label-for="fecha_entrega">
+                                <b-form-input id="fecha_entrega" type="date" v-model="editableEquipo.fecha_entrega" />
                             </b-form-group>
                         </b-col>
 
-
+                        <!-- Accesorios -->
                         <b-col md="6" class="mb-3">
                             <b-form-group label="Accesorios" label-for="accesorios">
                                 <b-form-textarea id="accesorios" v-model="editableEquipo.accesorios" rows="2" />
                             </b-form-group>
                         </b-col>
 
+                        <!-- Detalles -->
                         <b-col md="6" class="mb-3">
-                            <b-form-group label="Detalles" label-for="detalles">
-                                <b-form-textarea id="detalles" v-model="editableEquipo.detalles" rows="2" />
+                            <b-form-group label="Detalles" label-for="detalle">
+                                <b-form-textarea id="detalle" v-model="editableEquipo.detalle" rows="2" />
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -45,21 +57,24 @@
                     <hr />
                     <div class="d-flex justify-content-end">
                         <b-button variant="success" type="submit" class="mr-2">Guardar cambios</b-button>
-                        <b-button variant="danger" class="mr-2" @click="$emit('eliminar', editableEquipo)">Eliminar
-                            equipo</b-button>
+                        <b-button variant="danger" class="mr-2" @click="$emit('eliminar', editableEquipo)">
+                            Eliminar equipo
+                        </b-button>
                         <b-button variant="dark" @click="mostrarHistorial = true">Historial</b-button>
                     </div>
                 </b-form>
             </b-container>
         </b-modal>
 
+        <!-- Modal Historial -->
         <b-modal id="modal-historial" v-model="mostrarHistorial" title="Historial del Equipo" size="lg" hide-footer>
             <b-container fluid>
                 <b-table :items="historialEquipo" :fields="['fecha', 'detalle']" small bordered>
                     <template #cell(fecha)="data">
-                        {{ new Date(data.item.fecha).toLocaleDateString() }}
+                        {{ formatearFecha(data.item.fecha) }}
                     </template>
                 </b-table>
+
                 <div v-if="historialEquipo.length === 0" class="text-center text-muted">
                     No hay historial disponible para este equipo.
                 </div>
@@ -67,7 +82,6 @@
         </b-modal>
     </div>
 </template>
-
 
 <script>
 export default {
@@ -102,7 +116,7 @@ export default {
             },
             immediate: true
         },
-        'editableEquipo.fechaPeriodo'() {
+        'editableEquipo.fecha_periodo'() {
             this.actualizarFechaMantencion()
         },
         mostrarHistorial(nuevo) {
@@ -112,22 +126,49 @@ export default {
     methods: {
         guardarCambios() {
             this.actualizarFechaMantencion()
-            this.$emit('editar', this.editableEquipo)
+
+            const equipoAEnviar = {
+                ...this.editableEquipo,
+                fecha_periodo: this.normalizarFecha(this.editableEquipo.fecha_periodo),
+                fecha_entrega: this.normalizarFecha(this.editableEquipo.fecha_entrega),
+                fecha_mantencion: this.normalizarFecha(this.editableEquipo.fecha_mantencion),
+            }
+
+            this.$emit('editar', equipoAEnviar)
             this.$emit('cerrar')
             this.$root.$emit('bv::hide::modal', this.modalId)
         },
+
         actualizarFechaMantencion() {
-            if (!this.editableEquipo.fechaPeriodo) return
+            if (!this.editableEquipo.fecha_periodo) return
 
-            const fechaPeriodo = new Date(this.editableEquipo.fechaPeriodo)
-            const fechaMantencion = new Date(fechaPeriodo)
-            fechaMantencion.setFullYear(fechaPeriodo.getFullYear() + 1)
+            const fecha_periodo = new Date(this.editableEquipo.fecha_periodo)
+            const fecha_mantencion = new Date(fecha_periodo)
+            fecha_mantencion.setFullYear(fecha_periodo.getFullYear() + 1)
 
-            const yyyy = fechaMantencion.getFullYear()
-            const mm = String(fechaMantencion.getMonth() + 1).padStart(2, '0')
-            const dd = String(fechaMantencion.getDate()).padStart(2, '0')
+            const yyyy = fecha_mantencion.getFullYear()
+            const mm = String(fecha_mantencion.getMonth() + 1).padStart(2, '0')
+            const dd = String(fecha_mantencion.getDate()).padStart(2, '0')
 
-            this.editableEquipo.fechaMantencion = `${dd}/${mm}/${yyyy}`
+            this.editableEquipo.fecha_mantencion = `${dd}/${mm}/${yyyy}`
+        },
+
+        formatearFecha(fecha) {
+            if (!fecha) return ''
+            const d = new Date(fecha)
+            const day = String(d.getDate()).padStart(2, '0')
+            const month = String(d.getMonth() + 1).padStart(2, '0')
+            const year = d.getFullYear()
+            return `${day}/${month}/${year}`
+        },
+
+        normalizarFecha(fecha) {
+            if (!fecha) return null
+            const d = new Date(fecha)
+            const yyyy = d.getFullYear()
+            const mm = String(d.getMonth() + 1).padStart(2, '0')
+            const dd = String(d.getDate()).padStart(2, '0')
+            return `${yyyy}-${mm}-${dd}`
         },
 
         async cargarHistorial() {

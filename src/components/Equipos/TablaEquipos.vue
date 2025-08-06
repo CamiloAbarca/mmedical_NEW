@@ -4,7 +4,7 @@
 
     <b-row class="mb-3">
       <b-col md="3">
-        <b-form-input v-model="search" placeholder="Buscar por ID, Marca, Modelo, Serie" />
+        <b-form-input v-model="search" placeholder="Buscar por ID, Marca, Modelo, Nro de Serie" />
       </b-col>
 
       <b-col md="3">
@@ -39,8 +39,8 @@
           <b-icon icon="receipt" font-scale="1" />
         </b-button>
       </template>
-
     </b-table>
+
     <b-pagination v-model="paginaActual" :total-rows="equiposFiltrados.length" :per-page="porPagina" align="center"
       class="mt-3" pills variant="primary" />
 
@@ -53,7 +53,6 @@
       @dismissed="alertaVisible = false">
       ¡Equipo eliminado exitosamente!
     </b-alert>
-
 
     <EquipoModal v-if="equipoSeleccionado" :equipo="equipoSeleccionado" @cerrar="cerrarModal" @editar="editarEquipo"
       @eliminar="eliminarEquipoSeleccionado" />
@@ -83,30 +82,29 @@ export default {
       porPagina: 15,
       fields: [
         { key: 'id', label: 'ID', sortable: true, class: 'text-center' },
-        { key: 'serie', label: 'Nro de Serie', sortable: true, class: 'text-center' },
+        { key: 'tipo', label: 'Tipo', sortable: true, class: 'text-center' },
+        { key: 'nro_serie', label: 'Nro de Serie', sortable: true, class: 'text-center' },
         { key: 'marca', label: 'Marca', sortable: true, class: 'text-center' },
         { key: 'modelo', label: 'Modelo', sortable: true, class: 'text-center' },
-        { key: 'fechaMantencion', label: 'Fecha de Mantención', sortable: true, class: 'text-center' },
+        { key: 'fecha_mantencion', label: 'Fecha de Mantención', sortable: true, class: 'text-center' },
         { key: 'estado', label: 'Estado', sortable: true, class: 'text-center' },
         { key: 'acciones', label: 'Acciones', class: 'text-center' }
       ]
     }
   },
-  // No se necesita el prop `nuevosEquipos`
   created() {
-    // Cargar los equipos iniciales al crear el componente
     this.cargarEquipos()
+    this.$store.dispatch('cargarClientes')
   },
   computed: {
     ...mapGetters(['obtenerEquipos']),
     equiposTotales() {
-      // Ahora se obtienen todos los equipos del store
       return this.obtenerEquipos
     },
     equiposFiltrados() {
       return this.equiposTotales
         .filter(e => {
-          const texto = `${e.id} ${e.marca} ${e.modelo} ${e.serie}`.toLowerCase()
+          const texto = `${e.id} ${e.marca} ${e.modelo} ${e.nro_serie}`.toLowerCase()
           return (
             texto.includes(this.search.toLowerCase()) &&
             (this.filterMarca ? e.marca === this.filterMarca : true) &&
@@ -115,19 +113,21 @@ export default {
           )
         })
         .map(e => {
-          // Copiamos el equipo y calculamos la fecha de mantención
-          const fechaPeriodo = new Date(e.fechaPeriodo)
+          const fechaPeriodo = new Date(e.fecha_periodo || e.fechaPeriodo) // toma la que exista
+          if (isNaN(fechaPeriodo)) {
+            // Si no existe o inválida, devolver sin cambiar
+            return e
+          }
           const fechaMantencion = new Date(fechaPeriodo)
           fechaMantencion.setFullYear(fechaPeriodo.getFullYear() + 1)
 
-          // Formateamos como yyyy-mm-dd
           const yyyy = fechaMantencion.getFullYear()
           const mm = String(fechaMantencion.getMonth() + 1).padStart(2, '0')
           const dd = String(fechaMantencion.getDate()).padStart(2, '0')
 
           return {
             ...e,
-            fechaMantencion: `${yyyy}-${mm}-${dd}`
+            fecha_mantencion: `${yyyy}-${mm}-${dd}`
           }
         })
     },
@@ -157,14 +157,17 @@ export default {
       this.equipoSeleccionado = null
     },
     editarEquipo(equipo) {
-      // Usar la action de Vuex para actualizar el equipo
       this.actualizarEquipo(equipo)
       this.cerrarModal()
+      this.alertaTipo = 'actualizado'
+      this.alertaVisible = true
     },
     eliminarEquipoSeleccionado(equipo) {
       if (confirm(`¿Eliminar equipo ID ${equipo.id}?`)) {
         this.$store.dispatch('eliminarEquipo', equipo.id)
         this.cerrarModal()
+        this.alertaTipo = 'eliminado'
+        this.alertaVisible = true
       }
     }
   }
