@@ -30,6 +30,11 @@
     </b-row>
 
     <b-table :items="paginatedEquipos" :fields="fields" responsive striped hover small>
+      <template #cell(fecha_mantencion)="row">
+        <span :class="{ 'text-danger font-weight-bold': esFechaProxima(row.item.fecha_mantencion) }">
+          {{ row.item.fecha_mantencion }}
+        </span>
+      </template>
       <template #cell(acciones)="row">
         <b-button size="sm" title="Ver / Acciones" class="btn-icono"
           style="background-color: #4ecdc4; border-color: #4ecdc4;" @click="abrirModal(row.item)">
@@ -157,6 +162,16 @@ export default {
           console.error("Error al eliminar y recargar equipos:", error)
         }
       }
+    },
+    esFechaProxima(fechaString) {
+      if (!fechaString) return false;
+
+      const fechaMantencion = new Date(fechaString);
+      const hoy = new Date();
+      const dosSemanasEnMilisegundos = 14 * 24 * 60 * 60 * 1000;
+      const diferencia = fechaMantencion.getTime() - hoy.getTime();
+
+      return diferencia > 0 && diferencia <= dosSemanasEnMilisegundos;
     }
   }
 }
