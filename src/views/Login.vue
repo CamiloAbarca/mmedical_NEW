@@ -13,13 +13,17 @@
               <small class="text-muted">Ingresa tus credenciales</small>
             </div>
 
+            <b-alert v-if="error" variant="danger" dismissible>
+              {{ error }}
+            </b-alert>
+
             <b-form @submit.prevent="login">
               <b-form-group label="Usuario" label-for="usuario">
                 <b-input-group>
                   <b-input-group-prepend is-text>
                     <b-icon icon="person-fill" />
                   </b-input-group-prepend>
-                  <b-form-input id="usuario" v-model="user" required placeholder="Usuario" />
+                  <b-form-input id="usuario" v-model="user" required placeholder="Correo electrónico" />
                 </b-input-group>
               </b-form-group>
 
@@ -35,7 +39,6 @@
               <b-button type="submit" block style="background-color: #4ecdc4; border-color: #4ecdc4; color: #ffffff;">
                 Entrar
               </b-button>
-
             </b-form>
           </b-card>
         </b-col>
@@ -45,42 +48,60 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'LoginView',
   data() {
     return {
       user: '',
-      password: ''
-    }
+      password: '',
+      error: null,
+    };
   },
   methods: {
-    login() {
+    async login() {
       if (this.user && this.password) {
-        localStorage.setItem('auth', 'true')
-        this.$router.push('/dashboard')
+        try {
+          const res = await axios.post('http://localhost:3000/api/usuarios/login', {
+            email: this.user,
+            password: this.password
+          });
+
+          const token = res.data.token;
+          const user = res.data.user;
+
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+
+          // ✅ Toast de bienvenida
+          this.$bvToast.toast(`Bienvenido ${user.nombre}`, {
+            title: 'Inicio de sesión exitoso',
+            variant: 'success',
+            solid: true,
+            autoHideDelay: 3000
+          });
+
+          this.$router.push('/dashboard');
+        } catch (err) {
+          // ❌ Toast de error
+          this.$bvToast.toast('Credenciales incorrectas. Intenta nuevamente.', {
+            title: 'Error de inicio de sesión',
+            variant: 'danger',
+            solid: true,
+            autoHideDelay: 3000
+          });
+        }
+      } else {
+        this.$bvToast.toast('Por favor completa ambos campos.', {
+          title: 'Campos incompletos',
+          variant: 'warning',
+          solid: true,
+          autoHideDelay: 3000
+        });
       }
     }
+
   }
-}
+};
 </script>
-
-<style scoped>
-.login-page {
-  height: 100vh;
-  overflow: hidden;
-  background-color: #ffffff;
-  /* blanco limpio */
-}
-
-b-card {
-  border-radius: 0.75rem;
-}
-
-@media (max-height: 600px) {
-  .login-page {
-    align-items: flex-start;
-    padding-top: 2rem;
-    height: auto;
-  }
-}
-</style>

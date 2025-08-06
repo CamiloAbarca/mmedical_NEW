@@ -43,10 +43,20 @@ export default {
   },
   methods: {
     logout() {
-      localStorage.removeItem('auth')
-      this.$router.push('/login')
-      if (this.isMobile) this.$emit('close')
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      this.$bvToast.toast('Sesión cerrada correctamente.', {
+        title: 'Logout',
+        variant: 'info',
+        solid: true,
+        autoHideDelay: 2500
+      });
+
+      this.$router.push('/login');
+      if (this.isMobile) this.$emit('close');
     }
+
   }
 }
 </script>
@@ -62,7 +72,7 @@ export default {
 
 .nav-link-custom b-icon,
 .logout-btn b-icon {
-  color: #c7f434 !important;
+  color: #6134f4 !important;
 }
 
 

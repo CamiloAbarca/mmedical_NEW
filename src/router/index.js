@@ -32,13 +32,18 @@ const router = new VueRouter({
   routes,
 });
 
-// Protección de rutas (simulado)
+// ✅ Protección real usando token JWT
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem("auth") === "true";
-  if (to.matched.some((r) => r.meta.requiresAuth) && !isAuthenticated) {
-    next("/login");
+  const isAuthenticated = !!localStorage.getItem("token");
+
+  if (
+    to.matched.some((record) => record.meta.requiresAuth) &&
+    !isAuthenticated
+  ) {
+    // No autenticado y quiere entrar a ruta protegida
+    next("/");
   } else {
-    next();
+    next(); // continúa normalmente
   }
 });
 

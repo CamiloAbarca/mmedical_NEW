@@ -3,7 +3,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store'; // Importa tu store de Vuex
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import { BootstrapVue, IconsPlugin, ToastPlugin } from 'bootstrap-vue';
 
 // Importa los estilos de Bootstrap y BootstrapVue
 import 'bootstrap/dist/css/bootstrap.css';
@@ -14,6 +14,7 @@ Vue.config.productionTip = false;
 // Instala BootstrapVue y el plugin de íconos
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
+Vue.use(ToastPlugin)
 
 new Vue({
   router,
