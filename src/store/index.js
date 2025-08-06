@@ -71,7 +71,7 @@ export default new Vuex.Store({
         commit("SET_EQUIPOS", data);
       } catch (error) {
         console.error("Error al cargar equipos desde API:", error);
-        commit("SET_EQUIPOS", []); // o podrías no hacer commit y dejar el estado intacto
+        commit("SET_EQUIPOS", []);
       }
     },
 
@@ -96,23 +96,34 @@ export default new Vuex.Store({
     },
 
     // Actualizar equipo (PUT API)
-    async actualizarEquipo({ commit }, equipo) {
+    async actualizarEquipo({ commit, dispatch }, equipo) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:3000/api/equipos/${equipo.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify(equipo),
-        });
+        const response = await fetch(
+          `http://localhost:3000/api/equipos/${equipo.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+            body: JSON.stringify(equipo),
+          }
+        );
         if (!response.ok) throw new Error("Error al actualizar equipo");
         const equipoActualizado = await response.json();
         commit("UPDATE_EQUIPO", equipoActualizado);
+
+        const detalleHistorial = `Equipo actualizado. Estado: ${equipo.estado}, Fecha de período: ${equipo.fecha_periodo}, Fecha de entrega: ${equipo.fecha_entrega}`;
+        const historial = {
+          id_equipo: equipo.id,
+          detalle: detalleHistorial,
+          fecha: new Date().toISOString().split("T")[0],
+        };
+        await dispatch("agregarHistorial", historial);
       } catch (error) {
-        console.error(error);
-        commit("UPDATE_EQUIPO", equipo); // Opcional: actualizar localmente igual
+        console.error("Error al actualizar equipo y/o historial:", error);
+        commit("UPDATE_EQUIPO", equipo);
       }
     },
 
@@ -120,17 +131,60 @@ export default new Vuex.Store({
     async eliminarEquipo({ commit }, id) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:3000/api/equipos/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        });
+        const response = await fetch(
+          `http://localhost:3000/api/equipos/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+          }
+        );
         if (!response.ok) throw new Error("Error al eliminar equipo");
         commit("DELETE_EQUIPO", id);
       } catch (error) {
         console.error(error);
-        commit("DELETE_EQUIPO", id); // Opcional: eliminar localmente igual
+        commit("DELETE_EQUIPO", id);
+      }
+    },
+
+    // Acción para registrar un nuevo movimiento en el historial
+    async agregarHistorial(context, historial) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3000/api/historial", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify(historial),
+        });
+        if (!response.ok)
+          throw new Error("Error al agregar registro de historial");
+      } catch (error) {
+        console.error("Error al registrar historial:", error);
+      }
+    },
+
+    // Acción para cargar el historial de un equipo
+    async cargarHistorial(context, id_equipo) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `http://localhost:3000/api/historial/equipo/${id_equipo}`,
+          {
+            headers: {
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+          }
+        );
+        if (!response.ok) throw new Error("Error al cargar historial");
+        const historial = await response.json();
+        return historial;
+      } catch (error) {
+        console.error("Error al cargar historial:", error);
+        return [];
       }
     },
 
@@ -194,14 +248,17 @@ export default new Vuex.Store({
     async actualizarCliente({ commit }, cliente) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:3000/api/clientes/${cliente.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          body: JSON.stringify(cliente),
-        });
+        const response = await fetch(
+          `http://localhost:3000/api/clientes/${cliente.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+            body: JSON.stringify(cliente),
+          }
+        );
         if (!response.ok) throw new Error("Error al actualizar cliente");
         const clienteActualizado = await response.json();
         commit("UPDATE_CLIENTE", clienteActualizado);
@@ -214,12 +271,15 @@ export default new Vuex.Store({
     async eliminarCliente({ commit }, id) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:3000/api/clientes/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        });
+        const response = await fetch(
+          `http://localhost:3000/api/clientes/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+          }
+        );
         if (!response.ok) throw new Error("Error al eliminar cliente");
         commit("DELETE_CLIENTE", id);
       } catch (error) {

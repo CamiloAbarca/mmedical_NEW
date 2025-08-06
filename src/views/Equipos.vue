@@ -88,17 +88,17 @@
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Nro. de Serie" label-for="serie">
-                <b-form-input id="serie" v-model.trim="form.serie" :state="validarCampo('serie')" required
+              <b-form-group label="Nro. de Serie" label-for="nro_serie">
+                <b-form-input id="nro_serie" v-model.trim="form.nro_serie" :state="validarCampo('nro_serie')" required
                   placeholder="Ej: ABC123" />
                 <b-form-invalid-feedback>Este campo es obligatorio.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Fecha Ingreso" label-for="fechaIngreso">
-                <b-form-input id="fechaIngreso" type="date" v-model="form.fechaIngreso"
-                  :state="validarCampo('fechaIngreso')" required />
+              <b-form-group label="Fecha Ingreso" label-for="fecha_ingreso">
+                <b-form-input id="fecha_ingreso" type="date" v-model="form.fecha_ingreso"
+                  :state="validarCampo('fecha_ingreso')" required />
                 <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
@@ -107,17 +107,17 @@
 
           <b-row>
             <b-col md="6">
-              <b-form-group label="Fecha Inicio Periodo" label-for="fechaPeriodo">
-                <b-form-input id="fechaPeriodo" type="date" v-model="form.fechaPeriodo"
-                  :state="validarCampo('fechaPeriodo')" required />
+              <b-form-group label="Fecha Inicio Periodo" label-for="fecha_periodo">
+                <b-form-input id="fecha_periodo" type="date" v-model="form.fecha_periodo"
+                  :state="validarCampo('fecha_periodo')" required />
                 <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Fecha Ingreso" label-for="fechaIngreso">
-                <b-form-input id="fechaIngreso" type="date" v-model="form.fechaIngreso"
-                  :state="validarCampo('fechaIngreso')" required />
+              <b-form-group label="Fecha Entrega" label-for="fecha_entrega">
+                <b-form-input id="fecha_entrega" type="date" v-model="form.fecha_entrega"
+                  :state="validarCampo('fecha_entrega')" required />
                 <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
@@ -136,9 +136,9 @@
             </b-col>
 
             <b-col md="12">
-              <b-form-group label="Detalles" label-for="detalles">
-                <b-form-textarea id="detalles" v-model="form.detalles" placeholder="Ej: Equipo con piezas sulfatadas."
-                  :state="validarCampo('detalles')" required rows="2" />
+              <b-form-group label="Detalles" label-for="detalle">
+                <b-form-textarea id="detalle" v-model="form.detalle" placeholder="Ej: Equipo con piezas sulfatadas."
+                  :state="validarCampo('detalle')" required rows="2" />
                 <b-form-invalid-feedback>Describa los accesorios.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
@@ -176,12 +176,13 @@ export default {
         tipo: '',
         marca: '',
         modelo: '',
-        serie: '',
+        nro_serie: '',
         estado: '',
-        fechaIngreso: '',
-        fechaEntrega: '',
+        fecha_ingreso: '',
+        fecha_entrega: '',
+        fecha_periodo: '',
         accesorios: '',
-        detalles: '',
+        detalle: '',
         id_cliente: ''
       },
       camposValidados: false
@@ -237,51 +238,68 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['agregarEquipo', 'cargarClientes']),
+    ...mapActions(['agregarEquipo', 'cargarEquipos', 'cargarClientes']),
     validarCampo(campo) {
       if (!this.camposValidados) return null
       return this.form[campo] ? true : false
     },
-    guardarEquipo() {
+    async guardarEquipo() {
       this.camposValidados = true
-      // Validar que todos los campos obligatorios estén completos
+
       const camposCompletos = Object.values(this.form).every(val => val)
       if (!camposCompletos) {
         return
       }
 
-      // Crear el objeto del nuevo equipo
+      const fechaPeriodo = new Date(this.form.fecha_periodo)
+      const fechaMantencion = new Date(fechaPeriodo)
+      fechaMantencion.setFullYear(fechaPeriodo.getFullYear() + 1)
+
+      const fechaMantencionStr = fechaMantencion.toISOString().split('T')[0]
+
       const nuevo = {
-        id: Date.now(), // ID único temporal
-        ...this.form
+        ...this.form,
+        fecha_mantencion: fechaMantencionStr
       }
 
-      // Usar la action de Vuex para agregar el equipo
-      this.agregarEquipo(nuevo)
+      try {
+        // Espera a que la acción asíncrona termine
+        await this.agregarEquipo(nuevo);
 
-      // Cerrar el modal y resetear el formulario
-      this.mostrarModal = false
-      this.resetFormulario()
-      this.camposValidados = false
+        // Después de agregar, recarga la lista de equipos
+        await this.cargarEquipos();
+
+        // Cierra el modal y resetea el formulario solo si todo fue exitoso
+        this.mostrarModal = false
+        this.resetFormulario()
+        this.camposValidados = false
+      } catch (error) {
+        console.error("Error al guardar y recargar equipos:", error);
+        // Puedes manejar el error aquí (ej. mostrar una alerta)
+      }
     },
-    cerrarModal() {
-      this.mostrarModal = false
-      this.resetFormulario()
-      this.camposValidados = false
-    },
+
     resetFormulario() {
       this.form = {
         tipo: '',
         marca: '',
         modelo: '',
-        serie: '',
+        nro_serie: '',
         estado: '',
-        fechaIngreso: '',
-        fechaEntrega: '',
+        fecha_ingreso: '',
+        fecha_entrega: '',
+        fecha_periodo: '',
         accesorios: '',
-        detalles: ''
+        detalle: '',
+        id_cliente: ''
       }
+    },
+    cerrarModal() {
+      this.mostrarModal = false
+      this.resetFormulario()
+      this.camposValidados = false
     }
+
   },
   mounted() {
     if (this.obtenerClientes.length === 0) {

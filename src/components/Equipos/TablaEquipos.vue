@@ -6,7 +6,6 @@
       <b-col md="3">
         <b-form-input v-model="search" placeholder="Buscar por ID, Marca, Modelo, Nro de Serie" />
       </b-col>
-
       <b-col md="3">
         <b-form-select v-model="filterMarca" :options="marcas" class="mb-2">
           <template #first>
@@ -14,7 +13,6 @@
           </template>
         </b-form-select>
       </b-col>
-
       <b-col md="3">
         <b-form-select v-model="filterModelo" :options="modelos" class="mb-2">
           <template #first>
@@ -22,7 +20,6 @@
           </template>
         </b-form-select>
       </b-col>
-
       <b-col md="3">
         <b-form-select v-model="filterEstado" :options="estados" class="mb-2">
           <template #first>
@@ -102,34 +99,15 @@ export default {
       return this.obtenerEquipos
     },
     equiposFiltrados() {
-      return this.equiposTotales
-        .filter(e => {
-          const texto = `${e.id} ${e.marca} ${e.modelo} ${e.nro_serie}`.toLowerCase()
-          return (
-            texto.includes(this.search.toLowerCase()) &&
-            (this.filterMarca ? e.marca === this.filterMarca : true) &&
-            (this.filterModelo ? e.modelo === this.filterModelo : true) &&
-            (this.filterEstado ? e.estado === this.filterEstado : true)
-          )
-        })
-        .map(e => {
-          const fechaPeriodo = new Date(e.fecha_periodo || e.fechaPeriodo) // toma la que exista
-          if (isNaN(fechaPeriodo)) {
-            // Si no existe o inválida, devolver sin cambiar
-            return e
-          }
-          const fechaMantencion = new Date(fechaPeriodo)
-          fechaMantencion.setFullYear(fechaPeriodo.getFullYear() + 1)
-
-          const yyyy = fechaMantencion.getFullYear()
-          const mm = String(fechaMantencion.getMonth() + 1).padStart(2, '0')
-          const dd = String(fechaMantencion.getDate()).padStart(2, '0')
-
-          return {
-            ...e,
-            fecha_mantencion: `${yyyy}-${mm}-${dd}`
-          }
-        })
+      return this.equiposTotales.filter(e => {
+        const texto = `${e.id} ${e.marca} ${e.modelo} ${e.nro_serie}`.toLowerCase()
+        return (
+          texto.includes(this.search.toLowerCase()) &&
+          (this.filterMarca ? e.marca === this.filterMarca : true) &&
+          (this.filterModelo ? e.modelo === this.filterModelo : true) &&
+          (this.filterEstado ? e.estado === this.filterEstado : true)
+        )
+      })
     },
     paginatedEquipos() {
       const start = (this.paginaActual - 1) * this.porPagina
@@ -156,18 +134,28 @@ export default {
       this.mostrarModal = false
       this.equipoSeleccionado = null
     },
-    editarEquipo(equipo) {
-      this.actualizarEquipo(equipo)
-      this.cerrarModal()
-      this.alertaTipo = 'actualizado'
-      this.alertaVisible = true
-    },
-    eliminarEquipoSeleccionado(equipo) {
-      if (confirm(`¿Eliminar equipo ID ${equipo.id}?`)) {
-        this.$store.dispatch('eliminarEquipo', equipo.id)
+    async editarEquipo(equipo) {
+      try {
+        await this.actualizarEquipo(equipo)
+        await this.cargarEquipos()
         this.cerrarModal()
-        this.alertaTipo = 'eliminado'
+        this.alertaTipo = 'actualizado'
         this.alertaVisible = true
+      } catch (error) {
+        console.error("Error al actualizar y recargar equipos:", error)
+      }
+    },
+    async eliminarEquipoSeleccionado(equipo) {
+      if (confirm(`¿Eliminar equipo ID ${equipo.id}?`)) {
+        try {
+          await this.$store.dispatch('eliminarEquipo', equipo.id)
+          await this.cargarEquipos()
+          this.cerrarModal()
+          this.alertaTipo = 'eliminado'
+          this.alertaVisible = true
+        } catch (error) {
+          console.error("Error al eliminar y recargar equipos:", error)
+        }
       }
     }
   }
