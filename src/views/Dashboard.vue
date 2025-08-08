@@ -23,7 +23,7 @@
           <b-table :items="ultimosEquipos" :fields="camposTabla" small striped hover responsive />
         </b-card>
 
-        <b-card title="Equipos que necesitan revisión" class="mt-4">
+        <b-card title="Equipos que necesitan mantención" class="mt-4">
           <b-table :items="equiposNecesitanRevisionTabla" :fields="camposTablaRevision" small striped hover responsive>
             <template #cell(fecha_mantencion)="row">
               {{ formatearFecha(row.item.fecha_mantencion) }}
@@ -97,7 +97,7 @@ export default {
       return [
         { label: 'Total Equipos', valor: this.totalEquipos, color: 'primary' },
         { label: 'Facturados', valor: this.equiposFacturados, color: 'success' },
-        { label: 'Necesitan revisión', valor: this.equiposNecesitanRevision, color: 'danger' },
+        { label: 'Necesitan mantención', valor: this.equiposNecesitanRevision, color: 'danger' },
       ];
     },
 
@@ -121,7 +121,7 @@ export default {
         }
       });
 
-      estados['Necesitan revisión'] = this.equiposNecesitanRevision;
+      estados['Necesitan mantención'] = this.equiposNecesitanRevision;
 
       const labels = Object.keys(estados);
       const data = Object.values(estados);

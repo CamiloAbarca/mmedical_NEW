@@ -78,13 +78,13 @@ export default new Vuex.Store({
             const fechaMantencion = new Date(equipo.fecha_mantencion);
             const diferencia = fechaMantencion.getTime() - hoy.getTime();
 
-            // Si faltan <= 14 días y el estado NO es "Necesita revisión"
+            // Si faltan <= 14 días y el estado NO es "Necesita mantención"
             if (
               diferencia > 0 &&
               diferencia <= dosSemanas &&
-              equipo.estado !== "Necesita revisión"
+              equipo.estado !== "Necesita mantención"
             ) {
-              equipo.estado = "Necesita revisión";
+              equipo.estado = "Necesita mantención";
               // Actualizar en la API
               await dispatch("actualizarEquipo", equipo);
             }
