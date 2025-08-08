@@ -57,11 +57,11 @@ export default new Vuex.Store({
   },
 
   actions: {
-    // Cargar equipos solo desde API, sin dummy
+    // Cargar equipos solo desde API
     async cargarEquipos({ commit }) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3000/api/equipos", {
+        const response = await fetch("https://mmedical.cl/api/equipos", {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",
           },
@@ -79,7 +79,7 @@ export default new Vuex.Store({
     async agregarEquipo({ commit }, equipo) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3000/api/equipos", {
+        const response = await fetch("https://mmedical.cl/api/equipos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -100,7 +100,7 @@ export default new Vuex.Store({
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:3000/api/equipos/${equipo.id}`,
+          `https://mmedical.cl/api/equipos/${equipo.id}`,
           {
             method: "PUT",
             headers: {
@@ -131,15 +131,12 @@ export default new Vuex.Store({
     async eliminarEquipo({ commit }, id) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:3000/api/equipos/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: token ? `Bearer ${token}` : "",
-            },
-          }
-        );
+        const response = await fetch(`https://mmedical.cl/api/equipos/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
         if (!response.ok) throw new Error("Error al eliminar equipo");
         commit("DELETE_EQUIPO", id);
       } catch (error) {
@@ -152,7 +149,7 @@ export default new Vuex.Store({
     async agregarHistorial(context, historial) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3000/api/historial", {
+        const response = await fetch("https://mmedical.cl/api/historial", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -172,7 +169,7 @@ export default new Vuex.Store({
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:3000/api/historial/equipo/${id_equipo}`,
+          `https://mmedical.cl/api/historial/equipo/${id_equipo}`,
           {
             headers: {
               Authorization: token ? `Bearer ${token}` : "",
@@ -188,11 +185,11 @@ export default new Vuex.Store({
       }
     },
 
-    // Cargar clientes (se eliminó la lógica con dummy)
+    // Cargar clientes
     async cargarClientes({ commit }) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3000/api/clientes", {
+        const response = await fetch("https://mmedical.cl/api/clientes", {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",
           },
@@ -202,7 +199,6 @@ export default new Vuex.Store({
         commit("SET_CLIENTES", data);
       } catch (error) {
         console.error("Error al cargar clientes:", error);
-        // Puedes decidir si quieres mantener los datos dummy o dejarlo vacío en caso de error
         commit("SET_CLIENTES", []);
       }
     },
@@ -211,7 +207,7 @@ export default new Vuex.Store({
     async agregarCliente({ commit }, cliente) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3000/api/clientes", {
+        const response = await fetch("https://mmedical.cl/api/clientes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -232,7 +228,7 @@ export default new Vuex.Store({
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:3000/api/clientes/${cliente.id}`,
+          `https://mmedical.cl/api/clientes/${cliente.id}`,
           {
             method: "PUT",
             headers: {
@@ -255,15 +251,12 @@ export default new Vuex.Store({
     async eliminarCliente({ commit }, id) {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:3000/api/clientes/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: token ? `Bearer ${token}` : "",
-            },
-          }
-        );
+        const response = await fetch(`https://mmedical.cl/api/clientes/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
         if (!response.ok) throw new Error("Error al eliminar cliente");
         commit("DELETE_CLIENTE", id);
       } catch (error) {

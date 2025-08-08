@@ -1,38 +1,46 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
-import Dashboard from "../views/Dashboard.vue";
-import Clientes from "../views/Clientes.vue";
-import Equipos from "../views/Equipos.vue";
+import DashboardLayout from "../components/DashboardLayout.vue"; // Importa el nuevo layout
 
 Vue.use(VueRouter);
 
 const routes = [
-  { path: "/", redirect: "/login" },
+  // Ruta para el login, no tiene layout
   { path: "/login", component: Login },
+
+  // Agrupa todas las rutas protegidas bajo un solo layout
   {
-    path: "/dashboard",
-    component: Dashboard,
+    path: "/", // Esta ruta base ahora carga el DashboardLayout
+    component: DashboardLayout,
     meta: { requiresAuth: true },
-  },
-  {
-    path: "/clientes",
-    component: Clientes,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/equipos",
-    component: Equipos,
-    meta: { requiresAuth: true },
+    children: [
+      { path: "", redirect: "dashboard" }, // Redirige la ruta base a dashboard si está autenticado
+      {
+        path: "dashboard", // Nota: sin el '/' inicial
+        name: "Dashboard",
+        component: () => import("../views/Dashboard.vue"),
+      },
+      {
+        path: "clientes",
+        name: "Clientes",
+        component: () => import("../views/Clientes.vue"),
+      },
+      {
+        path: "equipos",
+        name: "Equipos",
+        component: () => import("../views/Equipos.vue"),
+      },
+    ],
   },
 ];
 
 const router = new VueRouter({
   mode: "history",
+  base: "/control/",
   routes,
 });
 
-// ✅ Protección real usando token JWT
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem("token");
 
@@ -40,10 +48,11 @@ router.beforeEach((to, from, next) => {
     to.matched.some((record) => record.meta.requiresAuth) &&
     !isAuthenticated
   ) {
-    // No autenticado y quiere entrar a ruta protegida
-    next("/");
+    next("/login");
+  } else if (to.path === "/login" && isAuthenticated) {
+    next("/dashboard");
   } else {
-    next(); // continúa normalmente
+    next();
   }
 });
 

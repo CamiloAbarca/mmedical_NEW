@@ -63,7 +63,7 @@ export default {
     async login() {
       if (this.user && this.password) {
         try {
-          const res = await axios.post('http://localhost:3000/api/usuarios/login', {
+          const res = await axios.post('https://mmedical.cl/api/usuarios/login', {
             email: this.user,
             password: this.password
           });
