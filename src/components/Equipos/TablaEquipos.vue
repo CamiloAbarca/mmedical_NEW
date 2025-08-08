@@ -29,7 +29,22 @@
       </b-col>
     </b-row>
 
-    <b-table :items="paginatedEquipos" :fields="fields" responsive striped hover small>
+    <b-skeleton-table
+      v-if="cargandoEquipos"
+      :rows="10"
+      :columns="fields.length"
+      animation="wave"
+      class="mb-3"
+    />
+    <b-table
+      v-else
+      :items="paginatedEquipos"
+      :fields="fields"
+      responsive
+      striped
+      hover
+      small
+    >
       <template #cell(fecha_mantencion)="row">
         <span :class="{ 'text-danger font-weight-bold': esFechaProxima(row.item.fecha_mantencion) }">
           {{ formatearFecha(row.item.fecha_mantencion) }}
@@ -43,21 +58,65 @@
       </template>
     </b-table>
 
-    <b-pagination v-model="paginaActual" :total-rows="equiposFiltrados.length" :per-page="porPagina" align="center"
-      class="mt-3" pills variant="primary" />
+    <b-pagination
+      v-if="!cargandoEquipos"
+      v-model="paginaActual"
+      :total-rows="equiposFiltrados.length"
+      :per-page="porPagina"
+      align="center"
+      class="mt-3"
+      pills
+      variant="primary"
+    />
 
     <b-alert v-if="alertaVisible && alertaTipo === 'actualizado'" variant="success" dismissible
       @dismissed="alertaVisible = false">
       ¡Equipo actualizado correctamente!
     </b-alert>
 
-    <b-alert v-if="alertaVisible && alertaTipo === 'eliminado'" variant="danger" dismissible
-      @dismissed="alertaVisible = false">
-      ¡Equipo eliminado exitosamente!
+    <b-alert
+      v-if="alertaVisible && alertaTipo === 'eliminado'"
+      variant="danger"
+      dismissible
+      @dismissed="alertaVisible = false"
+      show
+      class="d-flex align-items-center py-3 px-4"
+      style="font-size: 1.1rem;"
+    >
+      <b-icon
+        icon="exclamation-triangle-fill"
+        variant="danger"
+        font-scale="2"
+        class="mr-3 flex-shrink-0"
+      />
+      <div>
+        <div class="font-weight-bold mb-1">¡Equipo eliminado exitosamente!</div>
+        <div class="small text-danger">Esta acción <span class="font-weight-bold">no se puede deshacer</span>.</div>
+      </div>
     </b-alert>
 
     <EquipoModal v-if="equipoSeleccionado" :equipo="equipoSeleccionado" @cerrar="cerrarModal" @editar="editarEquipo"
       @eliminar="eliminarEquipoSeleccionado" />
+
+    <b-modal
+      id="modal-confirmar-eliminar"
+      ref="modalConfirmarEliminar"
+      title="¿Eliminar equipo?"
+      ok-title="Sí, eliminar"
+      cancel-title="Cancelar"
+      ok-variant="danger"
+      cancel-variant="secondary"
+      centered
+      @ok="confirmarEliminarEquipo"
+    >
+      <div class="d-flex align-items-center">
+        <b-icon icon="exclamation-triangle-fill" variant="danger" font-scale="2" class="mr-3"/>
+        <div>
+          <div class="font-weight-bold mb-2 text-danger">¿Estás seguro que deseas eliminar este equipo?</div>
+          <div class="small text-muted">Esta acción <span class="font-weight-bold">no se puede deshacer</span>.</div>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -82,6 +141,8 @@ export default {
       filterEstado: '',
       paginaActual: 1,
       porPagina: 15,
+      cargandoEquipos: true, // NUEVO
+      equipoAEliminar: null,
       fields: [
         { key: 'id', label: 'ID', sortable: true, class: 'text-center' },
         { key: 'tipo', label: 'Tipo', sortable: true, class: 'text-center' },
@@ -94,8 +155,8 @@ export default {
       ]
     }
   },
-  created() {
-    this.cargarEquipos()
+  async created() {
+    await this.cargarEquiposConSkeleton();
     this.$store.dispatch('cargarClientes')
   },
   computed: {
@@ -130,6 +191,11 @@ export default {
   },
   methods: {
     ...mapActions(['cargarEquipos', 'actualizarEquipo', 'eliminarEquipo']),
+    async cargarEquiposConSkeleton() {
+      this.cargandoEquipos = true;
+      await this.cargarEquipos();
+      this.cargandoEquipos = false;
+    },
     abrirModal(equipo) {
       this.equipoSeleccionado = equipo
       this.mostrarModal = true
@@ -147,24 +213,31 @@ export default {
         if (index !== -1) {
           this.obtenerEquipos.splice(index, 1, { ...equipo })
         }
-        this.cerrarModal()
+        // this.cerrarModal() // <-- Quita o comenta esta línea
         this.alertaTipo = 'actualizado'
         this.alertaVisible = true
       } catch (error) {
         console.error("Error al actualizar:", error)
       }
     },
-    async eliminarEquipoSeleccionado(equipo) {
-      if (confirm(`¿Eliminar equipo ID ${equipo.id}?`)) {
-        try {
-          await this.$store.dispatch('eliminarEquipo', equipo.id)
-          await this.cargarEquipos()
-          this.cerrarModal()
-          this.alertaTipo = 'eliminado'
-          this.alertaVisible = true
-        } catch (error) {
-          console.error("Error al eliminar y recargar equipos:", error)
-        }
+    eliminarEquipoSeleccionado(equipo) {
+      this.equipoAEliminar = equipo;
+      this.$refs.modalConfirmarEliminar.show();
+    },
+    async confirmarEliminarEquipo() {
+      if (!this.equipoAEliminar) return;
+      try {
+        await this.eliminarEquipo(this.equipoAEliminar.id);
+        this.alertaTipo = 'eliminado';
+        this.alertaVisible = true;
+        this.equipoAEliminar = null;
+        this.cerrarModal();
+      } catch (error) {
+        this.$bvToast.toast('Error al eliminar el equipo.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
       }
     },
     formatearFecha(fechaString) {

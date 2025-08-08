@@ -119,9 +119,12 @@ export default new Vuex.Store({
     },
 
     // Actualizar equipo (PUT API)
-    async actualizarEquipo({ commit, dispatch }, equipo) {
+    async actualizarEquipo({ commit, dispatch, state }, equipo) {
       try {
         const token = localStorage.getItem("token");
+        // Obtener el equipo anterior antes de actualizar
+        const equipoAnterior = state.equipos.find((e) => e.id === equipo.id);
+
         const response = await fetch(
           `https://mmedical.cl/api/equipos/${equipo.id}`,
           {
@@ -137,7 +140,23 @@ export default new Vuex.Store({
         const equipoActualizado = await response.json();
         commit("UPDATE_EQUIPO", equipoActualizado);
 
-        const detalleHistorial = `Equipo actualizado. Estado: ${equipo.estado}, Fecha de período: ${equipo.fecha_periodo}, Fecha de entrega: ${equipo.fecha_entrega}`;
+        // Comparar campos y armar detalle de cambios
+        let detalleHistorial = "";
+        if (equipoAnterior) {
+          const cambios = [];
+          for (const key in equipo) {
+            if (
+              Object.prototype.hasOwnProperty.call(equipo, key) &&
+              equipo[key] !== equipoAnterior[key]
+            ) {
+              cambios.push(`${key}: "${equipoAnterior[key]}" a "${equipo[key]}"`);
+            }
+          }
+          if (cambios.length > 0) {
+            detalleHistorial += cambios.join(", ");
+          }
+        }
+
         const historial = {
           id_equipo: equipo.id,
           detalle: detalleHistorial,

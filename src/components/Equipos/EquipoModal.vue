@@ -50,14 +50,42 @@
 
         <b-modal id="modal-historial" v-model="mostrarHistorial" title="Historial del Equipo" size="lg" hide-footer>
             <b-container fluid>
-                <b-table :items="historialEquipo" :fields="['fecha', 'detalle']" small bordered>
+                <b-skeleton-table
+                    v-if="cargandoHistorial"
+                    :rows="5"
+                    :columns="2"
+                    animation="wave"
+                    class="mb-3"
+                />
+                <b-table
+                    v-else
+                    :items="historialPaginado"
+                    :fields="['fecha', 'detalle']"
+                    small
+                    bordered
+                >
                     <template #cell(fecha)="row">
                         {{ formatearFecha(row.item.fecha) }}
                     </template>
+                    <template #cell(detalle)="row">
+                        <ul class="mb-0 pl-3">
+                            <li v-for="(cambio, idx) in separarCambios(row.item.detalle)" :key="idx">
+                                {{ cambio.trim() }}
+                            </li>
+                        </ul>
+                    </template>
                 </b-table>
-                <div v-if="historialEquipo.length === 0" class="text-center text-muted">
+                <div v-if="!cargandoHistorial && historialEquipo.length === 0" class="text-center text-muted">
                     No hay historial disponible para este equipo.
                 </div>
+                <b-pagination
+                    v-if="!cargandoHistorial && totalPaginasHistorial > 1"
+                    v-model="paginaHistorial"
+                    :total-rows="historialEquipo.length"
+                    :per-page="elementosPorPagina"
+                    align="center"
+                    class="mt-2"
+                />
             </b-container>
         </b-modal>
     </div>
@@ -90,7 +118,20 @@ export default {
                 'Despachado',
                 'Facturado',
                 'Garantía'
-            ]
+            ],
+            paginaHistorial: 1, // NUEVO: página actual
+            elementosPorPagina: 5, // NUEVO: elementos por página
+            cargandoHistorial: false
+        }
+    },
+    computed: {
+        historialPaginado() {
+            const inicio = (this.paginaHistorial - 1) * this.elementosPorPagina;
+            const fin = inicio + this.elementosPorPagina;
+            return this.historialEquipo.slice(inicio, fin);
+        },
+        totalPaginasHistorial() {
+            return Math.ceil(this.historialEquipo.length / this.elementosPorPagina);
         }
     },
     watch: {
@@ -112,6 +153,9 @@ export default {
             if (nuevo && this.equipo && this.equipo.id) {
                 this.cargarHistorial();
             }
+        },
+        historialEquipo() {
+            this.paginaHistorial = 1; // Reinicia a la primera página al cargar historial
         }
     },
     methods: {
@@ -124,8 +168,17 @@ export default {
                 fecha_mantencion: this.editableEquipo.fecha_mantencion,
             };
             this.$emit('editar', equipoAEnviar);
-            this.$emit('cerrar');
-            this.$root.$emit('bv::hide::modal', this.modalId);
+            // No cerrar el modal aquí
+            // this.$emit('cerrar');
+            // this.$root.$emit('bv::hide::modal', this.modalId);
+
+            // Mostrar toast de éxito
+            this.$bvToast.toast('¡Cambios guardados correctamente!', {
+                title: 'Éxito',
+                variant: 'success',
+                solid: true,
+                autoHideDelay: 3000
+            });
         },
         actualizarFechaMantencion() {
             if (!this.editableEquipo.fecha_periodo) {
@@ -161,7 +214,14 @@ export default {
             return d.toISOString().split('T')[0];
         },
         async cargarHistorial() {
-            this.historialEquipo = await this.$store.dispatch('cargarHistorial', this.equipo.id);
+            this.cargandoHistorial = true;
+            let historial = await this.$store.dispatch('cargarHistorial', this.equipo.id);
+            this.historialEquipo = historial.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            this.cargandoHistorial = false;
+        },
+        separarCambios(detalle) {
+            if (!detalle) return [];
+            return detalle.split(',');
         }
     }
 };
