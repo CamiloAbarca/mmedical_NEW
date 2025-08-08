@@ -21,7 +21,12 @@ export default {
                 maintainAspectRatio: false,
                 legend: { display: false },
                 scales: {
-                    yAxes: [{ ticks: { beginAtZero: true } }]
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            precision: 0 // fuerza que se muestren solo números enteros
+                        }
+                    }]
                 }
             }
         })
