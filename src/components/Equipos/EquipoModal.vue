@@ -51,6 +51,9 @@
         <b-modal id="modal-historial" v-model="mostrarHistorial" title="Historial del Equipo" size="lg" hide-footer>
             <b-container fluid>
                 <b-table :items="historialEquipo" :fields="['fecha', 'detalle']" small bordered>
+                    <template #cell(fecha)="row">
+                        {{ formatearFecha(row.item.fecha) }}
+                    </template>
                 </b-table>
                 <div v-if="historialEquipo.length === 0" class="text-center text-muted">
                     No hay historial disponible para este equipo.
@@ -143,18 +146,13 @@ export default {
             this.editableEquipo.fecha_mantencion = `${yyyy}-${mm}-${dd}`;
         },
         formatearFecha(fecha) {
-            if (!fecha || typeof fecha !== 'string' || !fecha.includes('-')) {
-                return '';
-            }
-            const [year, month, day] = fecha.split('-').map(Number);
-            const d = new Date(year, month - 1, day);
-            if (isNaN(d.getTime())) {
-                return '';
-            }
-            const dayFormatted = String(d.getDate()).padStart(2, '0');
-            const monthFormatted = String(d.getMonth() + 1).padStart(2, '0');
-            const yearFormatted = d.getFullYear();
-            return `${dayFormatted}/${monthFormatted}/${yearFormatted}`;
+            if (!fecha) return '';
+            const d = new Date(fecha);
+            if (isNaN(d.getTime())) return '';
+            const dia = String(d.getDate()).padStart(2, '0');
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const anio = d.getFullYear();
+            return `${dia}/${mes}/${anio}`;
         },
         normalizarFechaParaInput(fecha) {
             if (!fecha) return null;

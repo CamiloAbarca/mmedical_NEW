@@ -24,8 +24,11 @@
         </b-card>
 
         <b-card title="Equipos que necesitan revisión" class="mt-4">
-          <b-table :items="equiposNecesitanRevisionTabla" :fields="camposTablaRevision" small striped hover
-            responsive />
+          <b-table :items="equiposNecesitanRevisionTabla" :fields="camposTablaRevision" small striped hover responsive>
+            <template #cell(fecha_mantencion)="row">
+              {{ formatearFecha(row.item.fecha_mantencion) }}
+            </template>
+          </b-table>
         </b-card>
       </b-col>
     </b-row>
@@ -142,6 +145,15 @@ export default {
   },
   methods: {
     ...mapActions(['cargarEquipos']),
+    formatearFecha(fecha) {
+      if (!fecha) return '';
+      const d = new Date(fecha);
+      if (isNaN(d.getTime())) return '';
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const anio = d.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+    }
   },
 };
 </script>
