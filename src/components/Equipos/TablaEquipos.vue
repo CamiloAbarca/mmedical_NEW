@@ -142,12 +142,16 @@ export default {
     async editarEquipo(equipo) {
       try {
         await this.actualizarEquipo(equipo)
-        await this.cargarEquipos()
+        // Actualizar localmente el equipo en Vuex (si tienes un mutation directa)
+        const index = this.obtenerEquipos.findIndex(e => e.id === equipo.id)
+        if (index !== -1) {
+          this.obtenerEquipos.splice(index, 1, { ...equipo })
+        }
         this.cerrarModal()
         this.alertaTipo = 'actualizado'
         this.alertaVisible = true
       } catch (error) {
-        console.error("Error al actualizar y recargar equipos:", error)
+        console.error("Error al actualizar:", error)
       }
     },
     async eliminarEquipoSeleccionado(equipo) {

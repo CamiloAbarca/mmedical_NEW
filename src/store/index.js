@@ -58,7 +58,7 @@ export default new Vuex.Store({
 
   actions: {
     // Cargar equipos solo desde API
-    async cargarEquipos({ commit }) {
+    async cargarEquipos({ commit, dispatch }) {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/equipos", {
@@ -68,6 +68,29 @@ export default new Vuex.Store({
         });
         if (!response.ok) throw new Error("Error al cargar equipos");
         const data = await response.json();
+
+        const hoy = new Date();
+        const dosSemanas = 14 * 24 * 60 * 60 * 1000;
+
+        // Recorremos los equipos
+        for (let equipo of data) {
+          if (equipo.fecha_mantencion) {
+            const fechaMantencion = new Date(equipo.fecha_mantencion);
+            const diferencia = fechaMantencion.getTime() - hoy.getTime();
+
+            // Si faltan <= 14 días y el estado NO es "Necesita revisión"
+            if (
+              diferencia > 0 &&
+              diferencia <= dosSemanas &&
+              equipo.estado !== "Necesita revisión"
+            ) {
+              equipo.estado = "Necesita revisión";
+              // Actualizar en la API
+              await dispatch("actualizarEquipo", equipo);
+            }
+          }
+        }
+
         commit("SET_EQUIPOS", data);
       } catch (error) {
         console.error("Error al cargar equipos desde API:", error);
