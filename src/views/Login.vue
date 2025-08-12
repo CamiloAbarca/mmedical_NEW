@@ -36,7 +36,8 @@
                 </b-input-group>
               </b-form-group>
 
-              <b-button type="submit" block style="background-color: #4ecdc4; border-color: #4ecdc4; color: #ffffff;" :disabled="loading">
+              <b-button type="submit" block style="background-color: #4ecdc4; border-color: #4ecdc4; color: #ffffff;"
+                :disabled="loading">
                 <b-spinner small v-if="loading" class="mr-2" />
                 Entrar
               </b-button>
@@ -50,6 +51,7 @@
 
 <script>
 import axios from 'axios';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'LoginView',
@@ -58,13 +60,14 @@ export default {
       user: '',
       password: '',
       error: null,
-      loading: false, // ← Nuevo
+      loading: false,
     };
   },
   methods: {
+    ...mapActions(['setLocalUser']),
     async login() {
       if (this.user && this.password) {
-        this.loading = true; // ← Nuevo
+        this.loading = true;
         try {
           const res = await axios.post('https://mmedical.cl/api/usuarios/login', {
             email: this.user,
@@ -76,6 +79,9 @@ export default {
 
           localStorage.setItem('token', token);
           localStorage.setItem('user', JSON.stringify(user));
+
+          // Guardar el usuario en el store de Vuex
+          this.$store.commit('SET_USER', user);
 
           this.$bvToast.toast(`Bienvenido ${user.nombre}`, {
             title: 'Inicio de sesión exitoso',
@@ -93,7 +99,7 @@ export default {
             autoHideDelay: 3000
           });
         } finally {
-          this.loading = false; // ← Nuevo
+          this.loading = false;
         }
       } else {
         this.$bvToast.toast('Por favor completa ambos campos.', {

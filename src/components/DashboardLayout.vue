@@ -1,9 +1,6 @@
-<!-- src/components/DashboardLayout.vue -->
 <template>
     <div class="d-flex flex-column vh-100">
-        <!-- Navbar -->
         <b-navbar type="dark" class="px-3 custom-navbar">
-            <!-- Botón para abrir sidebar en móvil -->
             <b-button variant="light" class="me-2 d-md-none" @click="mobileSidebar = true">
                 ☰
             </b-button>
@@ -15,15 +12,12 @@
                     style="height: 32px;" />
             </b-navbar-brand>
 
-            <!-- Botón para colapsar sidebar en desktop -->
             <b-button variant="light" class="me-2 d-none d-md-inline-block" @click="collapsed = !collapsed">
                 <b-icon :icon="collapsed ? 'chevron-double-right' : 'chevron-double-left'" />
             </b-button>
         </b-navbar>
 
-        <!-- Contenido principal con Sidebar y Router-View -->
         <div class="d-flex flex-grow-1 overflow-hidden">
-            <!-- Sidebar (Desktop) -->
             <div :class="[
                 'bg-light border-end d-none d-md-block',
                 collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'
@@ -31,35 +25,55 @@
                 <AppSidebar :collapsed="collapsed" />
             </div>
 
-            <!-- Sidebar (Mobile) -->
             <b-sidebar v-model="mobileSidebar" title="Menú" shadow class="d-md-none">
                 <AppSidebar isMobile @close="mobileSidebar = false" />
             </b-sidebar>
 
-            <!-- Main content (donde se renderizarán las vistas hijas) -->
             <div class="flex-grow-1 overflow-auto p-3">
                 <router-view />
             </div>
         </div>
+
+        <ChangePasswordModal />
     </div>
 </template>
 
 <script>
-import AppSidebar from './AppSidebar.vue'; // Asegúrate de que la ruta sea correcta
+import AppSidebar from './AppSidebar.vue';
+import ChangePasswordModal from './Usuarios/ChangePasswordModal.vue';
+import { mapGetters } from 'vuex';
 
 export default {
     name: 'DashboardLayout',
-    components: { AppSidebar },
+    components: { AppSidebar, ChangePasswordModal },
     data() {
         return {
             mobileSidebar: false,
             collapsed: false,
         };
     },
-    // No necesitas showSidebar aquí, ya que este layout solo se carga para rutas autenticadas
+    computed: {
+        ...mapGetters(['obtenerUsuario']),
+    },
+    methods: {
+        logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            this.$store.commit('SET_USER', null);
+
+            this.$bvToast.toast('Sesión cerrada correctamente.', {
+                title: 'Logout',
+                variant: 'info',
+                solid: true,
+                autoHideDelay: 2500
+            });
+
+            this.$router.push('/login');
+            if (this.isMobile) this.$emit('close');
+        }
+    },
     watch: {
         $route() {
-            // Cierra el sidebar móvil al cambiar de ruta
             this.mobileSidebar = false;
         },
     },

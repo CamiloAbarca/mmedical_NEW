@@ -1,6 +1,5 @@
 <template>
   <b-nav vertical class="custom-sidebar p-3">
-    <!-- Dashboard -->
     <b-nav-item to="/dashboard" class="nav-link-custom">
       <b-icon icon="speedometer" class="me-2" />
       <transition name="fade">
@@ -8,7 +7,6 @@
       </transition>
     </b-nav-item>
 
-    <!-- Equipos -->
     <b-nav-item to="/equipos" class="nav-link-custom">
       <b-icon icon="cpu" class="me-2" />
       <transition name="fade">
@@ -16,7 +14,6 @@
       </transition>
     </b-nav-item>
 
-    <!-- Clientes -->
     <b-nav-item to="/clientes" class="nav-link-custom">
       <b-icon icon="people-fill" class="me-2" />
       <transition name="fade">
@@ -24,27 +21,52 @@
       </transition>
     </b-nav-item>
 
-    <!-- Cerrar sesión -->
-    <b-button variant="danger" class="logout-btn mt-4" block @click="logout">
-      <b-icon icon="box-arrow-right" />
+    <b-nav-item v-if="isSuperUser" to="/usuarios" class="nav-link-custom">
+      <b-icon icon="person-lines-fill" class="me-2" />
       <transition name="fade">
-        <span v-if="!collapsed" class="ms-2">Cerrar Sesión</span>
+        <span v-if="!collapsed"> Usuarios</span>
       </transition>
+    </b-nav-item>
+
+    <b-dropdown dropdown variant="primary" class="user-dropdown mt-4" v-if="obtenerUsuario">
+      <template #button-content>
+        <b-icon icon="person-fill" class="me-2" />
+        <transition name="fade">
+          <span v-if="!collapsed" class="ms-2"> {{ obtenerUsuario.nombre }}</span>
+        </transition>
+      </template>
+      <b-dropdown-item @click="$bvModal.show('modal-change-password')">
+        Cambiar Contraseña
+      </b-dropdown-item>
+    </b-dropdown>
+    <b-button variant="danger" class="logout-btn mt-2" block @click="logout" v-if="!collapsed">
+      <b-icon icon="box-arrow-right" class="me-2" />
+      Cerrar Sesión
     </b-button>
   </b-nav>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'AppSidebar',
   props: {
     collapsed: Boolean,
     isMobile: Boolean
   },
+  computed: {
+    ...mapGetters(['obtenerUsuario']),
+    isSuperUser() {
+      const user = this.obtenerUsuario;
+      return user && user.tipo === 'super';
+    }
+  },
   methods: {
     logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      this.$store.commit('SET_USER', null);
 
       this.$bvToast.toast('Sesión cerrada correctamente.', {
         title: 'Logout',
@@ -56,7 +78,6 @@ export default {
       this.$router.push('/login');
       if (this.isMobile) this.$emit('close');
     }
-
   }
 }
 </script>
@@ -111,6 +132,18 @@ export default {
 .logout-btn:hover {
   background-color: #c44d58 !important;
   transform: scale(1.05);
+}
+
+.user-dropdown .btn-primary {
+  background-color: #4ecdc4;
+  border-color: #4ecdc4;
+  color: white !important;
+  text-align: left;
+}
+
+.user-dropdown .btn-primary:hover {
+  background-color: #3b9f98;
+  border-color: #3b9f98;
 }
 
 /* Text transition */

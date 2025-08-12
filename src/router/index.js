@@ -31,6 +31,13 @@ const routes = [
         name: "Equipos",
         component: () => import("../views/Equipos.vue"),
       },
+      // NUEVA RUTA PARA USUARIOS
+      {
+        path: "usuarios",
+        name: "Usuarios",
+        component: () => import("../views/Usuarios.vue"),
+        meta: { requiresAuth: true, requiresSuper: true },
+      },
     ],
   },
 ];
@@ -43,6 +50,8 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isSuperUser = user && user.tipo === "super";
 
   if (
     to.matched.some((record) => record.meta.requiresAuth) &&
@@ -51,6 +60,11 @@ router.beforeEach((to, from, next) => {
     next("/login");
   } else if (to.path === "/login" && isAuthenticated) {
     next("/dashboard");
+  } else if (
+    to.matched.some((record) => record.meta.requiresSuper) &&
+    !isSuperUser
+  ) {
+    next("/dashboard"); // Redirige a dashboard si no es 'super'
   } else {
     next();
   }

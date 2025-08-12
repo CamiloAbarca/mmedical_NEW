@@ -35,6 +35,8 @@ export default new Vuex.Store({
   state: {
     equipos: [],
     clientes: [],
+    usuarios: [],
+    user: null, // Estado para el usuario autenticado
   },
 
   getters: {
@@ -42,6 +44,8 @@ export default new Vuex.Store({
     obtenerEquipoPorId: (state) => (id) =>
       state.equipos.find((e) => e.id === id),
     obtenerClientes: (state) => state.clientes,
+    obtenerUsuarios: (state) => state.usuarios,
+    obtenerUsuario: (state) => state.user, // Getter para el usuario
   },
 
   mutations: {
@@ -81,6 +85,30 @@ export default new Vuex.Store({
     },
     DELETE_CLIENTE(state, id) {
       state.clientes = state.clientes.filter((c) => c.id !== id);
+    },
+
+    // Usuarios
+    SET_USUARIOS(state, usuarios) {
+      state.usuarios = usuarios;
+    },
+    ADD_USUARIO(state, usuario) {
+      state.usuarios.push(usuario);
+    },
+    UPDATE_USUARIO(state, usuarioActualizado) {
+      const index = state.usuarios.findIndex(
+        (c) => c.id === usuarioActualizado.id
+      );
+      if (index !== -1) {
+        Vue.set(state.usuarios, index, usuarioActualizado);
+      }
+    },
+    DELETE_USUARIO(state, id) {
+      state.usuarios = state.usuarios.filter((c) => c.id !== id);
+    },
+
+    // Mutación para establecer el usuario
+    SET_USER(state, user) {
+      state.user = user;
     },
   },
 
@@ -354,6 +382,90 @@ export default new Vuex.Store({
       } catch (error) {
         console.error(error);
         commit("DELETE_CLIENTE", id);
+      }
+    },
+
+    // Acción para cargar usuarios
+    async cargarUsuarios({ commit }) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("https://mmedical.cl/api/usuarios/", {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) throw new Error("Error al cargar usuarios");
+        const data = await response.json();
+        commit("SET_USUARIOS", data);
+      } catch (error) {
+        console.error("Error al cargar usuarios:", error);
+        commit("SET_USUARIOS", []);
+      }
+    },
+
+    // Agregar Usuario (POST API)
+    async agregarUsuario({ commit }, usuario) {
+      try {
+        const response = await fetch(
+          "https://mmedical.cl/api/usuarios/register",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(usuario),
+          }
+        );
+        if (!response.ok) throw new Error("Error al registrar el usuario");
+        const nuevoUsuario = await response.json();
+        commit("ADD_USUARIO", nuevoUsuario);
+      } catch (error) {
+        console.error("Error al registrar usuario:", error);
+      }
+    },
+
+    async actualizarUsuario({ commit }, usuario) {
+      console.warn("API para actualizar usuario no implementada.");
+      commit("UPDATE_USUARIO", usuario);
+    },
+    async eliminarUsuario({ commit }, id) {
+      console.warn("API para eliminar usuario no implementada.");
+      commit("DELETE_USUARIO", id);
+    },
+
+    async changePassword({ rootState }, { currentPassword, newPassword }) {
+      const token = localStorage.getItem("token");
+      const userId = rootState.user?.id;
+
+      if (!token || !userId) {
+        throw new Error("Usuario no autenticado.");
+      }
+
+      try {
+        const response = await fetch(
+          `https://mmedical.cl/api/usuarios/${userId}/change-password`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              currentPassword,
+              newPassword,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Error al cambiar la contraseña.");
+        }
+
+        console.log("Contraseña cambiada con éxito!");
+      } catch (error) {
+        console.error("Error al cambiar la contraseña:", error);
+        throw error;
       }
     },
   },
