@@ -42,6 +42,8 @@
                         <b-button variant="danger" class="mr-2" @click="$emit('eliminar', editableEquipo)">
                             Eliminar equipo
                         </b-button>
+                        <b-button variant="info" class="mr-2" v-b-modal.modal-info-completa>Mostrar Info.
+                            completa</b-button>
                         <b-button variant="dark" @click="mostrarHistorial = true">Historial</b-button>
                     </div>
                 </b-form>
@@ -50,20 +52,8 @@
 
         <b-modal id="modal-historial" v-model="mostrarHistorial" title="Historial del Equipo" size="lg" hide-footer>
             <b-container fluid>
-                <b-skeleton-table
-                    v-if="cargandoHistorial"
-                    :rows="5"
-                    :columns="2"
-                    animation="wave"
-                    class="mb-3"
-                />
-                <b-table
-                    v-else
-                    :items="historialPaginado"
-                    :fields="['fecha', 'detalle']"
-                    small
-                    bordered
-                >
+                <b-skeleton-table v-if="cargandoHistorial" :rows="5" :columns="2" animation="wave" class="mb-3" />
+                <b-table v-else :items="historialPaginado" :fields="['fecha', 'detalle']" small bordered>
                     <template #cell(fecha)="row">
                         {{ formatearFecha(row.item.fecha) }}
                     </template>
@@ -78,24 +68,24 @@
                 <div v-if="!cargandoHistorial && historialEquipo.length === 0" class="text-center text-muted">
                     No hay historial disponible para este equipo.
                 </div>
-                <b-pagination
-                    v-if="!cargandoHistorial && totalPaginasHistorial > 1"
-                    v-model="paginaHistorial"
-                    :total-rows="historialEquipo.length"
-                    :per-page="elementosPorPagina"
-                    align="center"
-                    class="mt-2"
-                />
+                <b-pagination v-if="!cargandoHistorial && totalPaginasHistorial > 1" v-model="paginaHistorial"
+                    :total-rows="historialEquipo.length" :per-page="elementosPorPagina" align="center" class="mt-2" />
             </b-container>
         </b-modal>
+
+        <InfoCompletaModal :equipo="equipo" :modal-id="'modal-info-completa'" />
     </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex';
+import InfoCompletaModal from '@/components/Equipos/InfoCompletaModal.vue';
 
 export default {
     name: 'EquipoModal',
+    components: {
+        InfoCompletaModal,
+    },
     props: {
         equipo: {
             type: Object,
@@ -119,8 +109,8 @@ export default {
                 'Facturado',
                 'Garantía'
             ],
-            paginaHistorial: 1, // NUEVO: página actual
-            elementosPorPagina: 5, // NUEVO: elementos por página
+            paginaHistorial: 1,
+            elementosPorPagina: 5,
             cargandoHistorial: false
         }
     },
@@ -142,6 +132,7 @@ export default {
                     this.editableEquipo.fecha_periodo = this.normalizarFechaParaInput(this.editableEquipo.fecha_periodo);
                     this.editableEquipo.fecha_entrega = this.normalizarFechaParaInput(this.editableEquipo.fecha_entrega);
                     this.actualizarFechaMantencion();
+                    this.cargarHistorial();
                 }
             },
             immediate: true
@@ -155,7 +146,7 @@ export default {
             }
         },
         historialEquipo() {
-            this.paginaHistorial = 1; // Reinicia a la primera página al cargar historial
+            this.paginaHistorial = 1;
         }
     },
     methods: {
@@ -168,11 +159,6 @@ export default {
                 fecha_mantencion: this.editableEquipo.fecha_mantencion,
             };
             this.$emit('editar', equipoAEnviar);
-            // No cerrar el modal aquí
-            // this.$emit('cerrar');
-            // this.$root.$emit('bv::hide::modal', this.modalId);
-
-            // Mostrar toast de éxito
             this.$bvToast.toast('¡Cambios guardados correctamente!', {
                 title: 'Éxito',
                 variant: 'success',
@@ -226,3 +212,7 @@ export default {
     }
 };
 </script>
+
+<style>
+/* ... (estilos originales) */
+</style>

@@ -7,7 +7,7 @@
       </b-button>
     </div>
 
-    <TablaEquipos />
+    <TablaEquipos @mostrar-info="mostrarInfoEquipo" />
 
     <b-modal id="modal-agregar-equipo" v-model="mostrarModal" title="Agregar Nuevo Equipo" @hide="resetFormulario"
       hide-footer centered size="lg" :header-style="{ backgroundColor: '#556270', color: 'white' }">
@@ -51,7 +51,6 @@
               <b-form-invalid-feedback>Seleccione un modelo.</b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-
         </b-row>
 
         <div v-if="form.tipo && form.marca && form.modelo">
@@ -102,7 +101,6 @@
                 <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
-
           </b-row>
 
           <b-row>
@@ -121,8 +119,6 @@
                 <b-form-invalid-feedback>Seleccione una fecha válida.</b-form-invalid-feedback>
               </b-form-group>
             </b-col>
-
-
           </b-row>
 
           <b-row>
@@ -154,24 +150,28 @@
             Cancelar
           </b-button>
         </div>
-
       </b-form>
     </b-modal>
+
+    <InfoCompletaModal :equipo="equipoSeleccionado" :modal-id="'modal-info-equipo'" />
   </div>
 </template>
 
 <script>
 import TablaEquipos from '@/components/Equipos/TablaEquipos.vue'
 import { mapGetters, mapActions } from 'vuex'
+import InfoCompletaModal from '@/components/Equipos/InfoCompletaModal.vue'
 
 export default {
   name: 'EquiposView',
   components: {
-    TablaEquipos
+    TablaEquipos,
+    InfoCompletaModal
   },
   data() {
     return {
       mostrarModal: false,
+      equipoSeleccionado: null,
       form: {
         tipo: '',
         marca: '',
@@ -202,7 +202,6 @@ export default {
       return this.form.tipo ? marcasPorTipo[this.form.tipo] : []
     },
     modelosDisponibles() {
-      //... (tu lógica original, no cambia)
       const modelos = {
         Humano: {
           Aerotel: ['HeartView 12 l'],
@@ -228,14 +227,20 @@ export default {
           Edan: ['X10 VET', 'Acclarix']
         }
       }
-
       const tipo = this.form.tipo
       const marca = this.form.marca
 
       if (!tipo || !marca) return []
 
       return modelos[tipo][marca] || []
-    }
+    },
+    // NUEVA PROPIEDAD COMPUTADA: ya no es necesaria aquí, se usa en el componente hijo
+    // clienteDeEquipoSeleccionado() {
+    //   if (this.equipoSeleccionado && this.equipoSeleccionado.id_cliente) {
+    //     return this.obtenerClientes.find(cliente => cliente.id === this.equipoSeleccionado.id_cliente) || null;
+    //   }
+    //   return null;
+    // }
   },
   methods: {
     ...mapActions(['agregarEquipo', 'cargarEquipos', 'cargarClientes']),
@@ -263,19 +268,13 @@ export default {
       }
 
       try {
-        // Espera a que la acción asíncrona termine
         await this.agregarEquipo(nuevo);
-
-        // Después de agregar, recarga la lista de equipos
         await this.cargarEquipos();
-
-        // Cierra el modal y resetea el formulario solo si todo fue exitoso
         this.mostrarModal = false
         this.resetFormulario()
         this.camposValidados = false
       } catch (error) {
         console.error("Error al guardar y recargar equipos:", error);
-        // Puedes manejar el error aquí (ej. mostrar una alerta)
       }
     },
 
@@ -298,8 +297,11 @@ export default {
       this.mostrarModal = false
       this.resetFormulario()
       this.camposValidados = false
+    },
+    async mostrarInfoEquipo(equipo) {
+      this.equipoSeleccionado = equipo;
+      this.$bvModal.show('modal-info-equipo');
     }
-
   },
   mounted() {
     if (this.obtenerClientes.length === 0) {
