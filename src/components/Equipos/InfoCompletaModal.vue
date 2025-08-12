@@ -1,16 +1,18 @@
 <template>
     <b-modal :id="modalId" title="Información Completa del Equipo" size="lg" ok-only ok-title="Cerrar"
         @hide="$emit('cerrar')" @shown="onShown">
-        <!-- Botón para exportar a PDF -->
         <div class="text-right mb-2">
             <b-button variant="danger" size="sm" @click="generarPDF">
                 <i class="fas fa-file-pdf mr-1"></i> Generar PDF
             </b-button>
         </div>
 
-        <!-- Contenido a imprimir/exportar -->
-        <div v-if="equipo" id="contenido-a-imprimir">
-            <!-- Cliente -->
+        <div v-if="equipo" id="contenido-a-imprimir" class="pdf-styled-container">
+            <div class="pdf-header mb-4">
+                <img src="@/assets/logo.png" alt="Mmedical Logo" class="pdf-logo" />
+                <h4 class="pdf-title mt-2">Informe Completo de Equipo</h4>
+            </div>
+
             <b-card class="mb-3" header="Datos del Cliente" header-tag="h5">
                 <template v-if="cliente">
                     <b-list-group flush>
@@ -23,7 +25,6 @@
                 </template>
             </b-card>
 
-            <!-- Equipo -->
             <b-card class="mb-3" header="Datos del Equipo" header-tag="h5">
                 <b-list-group flush>
                     <b-list-group-item><b>Tipo:</b> {{ equipo.tipo }}</b-list-group-item>
@@ -34,14 +35,13 @@
                     <b-list-group-item><b>Fecha Ingreso:</b> {{ formatDate(equipo.fecha_ingreso) }}</b-list-group-item>
                     <b-list-group-item><b>Fecha Entrega:</b> {{ formatDate(equipo.fecha_entrega) }}</b-list-group-item>
                     <b-list-group-item><b>Fecha Mantención:</b> {{ formatDate(equipo.fecha_mantencion)
-                        }}</b-list-group-item>
+                    }}</b-list-group-item>
                     <b-list-group-item><b>Fecha Periodo:</b> {{ formatDate(equipo.fecha_periodo) }}</b-list-group-item>
                     <b-list-group-item><b>Accesorios:</b> {{ equipo.accesorios }}</b-list-group-item>
                     <b-list-group-item><b>Detalle:</b> {{ equipo.detalle }}</b-list-group-item>
                 </b-list-group>
             </b-card>
 
-            <!-- Historial -->
             <div class="pdf-page-break">
                 <b-card header="Historial del Equipo" header-tag="h5">
                     <b-table v-if="historial.length" :items="historial" :fields="historialFields" small bordered
@@ -113,8 +113,8 @@ export default {
         generarPDF() {
             const element = document.getElementById("contenido-a-imprimir");
             const opt = {
-                margin: 0.5,
-                filename: `equipo_${this.equipo?.id || "info"}.pdf`,
+                margin: 0.2,
+                filename: `equipo_${this.equipo?.id || "info"}_informe.pdf`,
                 image: { type: "jpeg", quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
@@ -126,6 +126,49 @@ export default {
 </script>
 
 <style scoped>
+.pdf-styled-container {
+    padding: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.pdf-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #556270;
+    padding-bottom: 1rem;
+}
+
+.pdf-logo {
+    height: 60px;
+    margin-right: 1.5rem;
+}
+
+.pdf-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #4ecdc4;
+    margin: 0;
+}
+
+.b-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.b-card>>>.card-header {
+    background-color: #556270 !important;
+    color: #fff !important;
+    font-weight: bold;
+    padding: 0.75rem 1.25rem;
+}
+
+.b-list-group-item {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-bottom: 1px solid #eee;
+}
+
 .pdf-page-break {
     page-break-before: always;
 }
