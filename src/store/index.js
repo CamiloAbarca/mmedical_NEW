@@ -3,6 +3,34 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
+// Función auxiliar para normalizar la fecha a 'YYYY-MM-DD' para una comparación precisa.
+function normalizeDate(dateString) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return null;
+  return date.toISOString().split("T")[0];
+}
+
+// Función auxiliar para formatear la fecha a 'dd/mm/yyyy' para su visualización.
+function formatDateToDDMMYYYY(dateString) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+// Mapeo de nombres de campos para un historial más legible
+const fieldLabels = {
+  estado: "Estado",
+  fecha_entrega: "Fecha Entrega",
+  fecha_periodo: "Fecha inicio Periodo",
+  accesorios: "Accesorios",
+  detalle: "Detalles",
+};
+
 export default new Vuex.Store({
   state: {
     equipos: [],
@@ -122,50 +150,72 @@ export default new Vuex.Store({
     async actualizarEquipo({ commit, dispatch, state }, equipo) {
       try {
         const token = localStorage.getItem("token");
-        // Obtener el equipo anterior antes de actualizar
         const equipoAnterior = state.equipos.find((e) => e.id === equipo.id);
 
-        const response = await fetch(
-          `https://mmedical.cl/api/equipos/${equipo.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token ? `Bearer ${token}` : "",
-            },
-            body: JSON.stringify(equipo),
-          }
-        );
-        if (!response.ok) throw new Error("Error al actualizar equipo");
-        const equipoActualizado = await response.json();
-        commit("UPDATE_EQUIPO", equipoActualizado);
-
-        // Comparar campos y armar detalle de cambios
-        let detalleHistorial = "";
-        if (equipoAnterior) {
-          const cambios = [];
-          for (const key in equipo) {
-            if (
-              Object.prototype.hasOwnProperty.call(equipo, key) &&
-              equipo[key] !== equipoAnterior[key]
-            ) {
-              cambios.push(`${key}: "${equipoAnterior[key]}" a "${equipo[key]}"`);
-            }
-          }
-          if (cambios.length > 0) {
-            detalleHistorial += cambios.join(", ");
-          }
+        if (!equipoAnterior) {
+          throw new Error("Equipo no encontrado en el estado local");
         }
 
-        const historial = {
-          id_equipo: equipo.id,
-          detalle: detalleHistorial,
-          fecha: new Date().toISOString().split("T")[0],
-        };
-        await dispatch("agregarHistorial", historial);
+        const cambios = [];
+        const fieldsToCompare = [
+          "estado",
+          "fecha_entrega",
+          "fecha_periodo",
+          "accesorios",
+          "detalle",
+        ];
+
+        fieldsToCompare.forEach((key) => {
+          const oldValue = key.startsWith("fecha")
+            ? normalizeDate(equipoAnterior[key])
+            : equipoAnterior[key];
+          const newValue = key.startsWith("fecha")
+            ? normalizeDate(equipo[key])
+            : equipo[key];
+
+          if (oldValue !== newValue) {
+            const oldFormattedValue = key.startsWith("fecha")
+              ? formatDateToDDMMYYYY(oldValue)
+              : oldValue;
+            const newFormattedValue = key.startsWith("fecha")
+              ? formatDateToDDMMYYYY(newValue)
+              : newValue;
+            const label = fieldLabels[key] || key;
+            cambios.push(
+              `${label}: "${oldFormattedValue}" a "${newFormattedValue}"`
+            );
+          }
+        });
+
+        // Si hay cambios, enviar la actualización a la API y registrar el historial
+        if (cambios.length > 0) {
+          const response = await fetch(
+            `https://mmedical.cl/api/equipos/${equipo.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: token ? `Bearer ${token}` : "",
+              },
+              body: JSON.stringify(equipo),
+            }
+          );
+
+          if (!response.ok) throw new Error("Error al actualizar equipo");
+          const equipoActualizado = await response.json();
+
+          // Actualizar el estado local con la respuesta de la API
+          commit("UPDATE_EQUIPO", equipoActualizado);
+
+          const historial = {
+            id_equipo: equipo.id,
+            detalle: cambios.join(", "),
+            fecha: new Date().toISOString().split("T")[0],
+          };
+          await dispatch("agregarHistorial", historial);
+        }
       } catch (error) {
         console.error("Error al actualizar equipo y/o historial:", error);
-        commit("UPDATE_EQUIPO", equipo);
       }
     },
 

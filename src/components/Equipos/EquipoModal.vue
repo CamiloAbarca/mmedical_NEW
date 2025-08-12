@@ -80,6 +80,7 @@
 <script>
 import { mapActions } from 'vuex';
 import InfoCompletaModal from '@/components/Equipos/InfoCompletaModal.vue';
+import deepIs from 'deep-is';
 
 export default {
     name: 'EquipoModal',
@@ -101,6 +102,7 @@ export default {
             mostrarHistorial: false,
             historialEquipo: [],
             editableEquipo: { ...this.equipo },
+            originalEquipo: {}, // Guarda la copia original para comparación
             estadoOpciones: [
                 'En Revisión',
                 'Cotizado',
@@ -128,9 +130,19 @@ export default {
         equipo: {
             handler(nuevo) {
                 if (nuevo) {
-                    this.editableEquipo = { ...nuevo };
-                    this.editableEquipo.fecha_periodo = this.normalizarFechaParaInput(this.editableEquipo.fecha_periodo);
-                    this.editableEquipo.fecha_entrega = this.normalizarFechaParaInput(this.editableEquipo.fecha_entrega);
+                    // Crea una copia profunda del objeto original y normaliza las fechas para la comparación
+                    this.originalEquipo = {
+                        ...nuevo,
+                        fecha_periodo: this.normalizarFechaParaInput(nuevo.fecha_periodo),
+                        fecha_entrega: this.normalizarFechaParaInput(nuevo.fecha_entrega),
+                        // `fecha_mantencion` ya es una propiedad calculada, se recalculará
+                        fecha_mantencion: this.normalizarFechaParaInput(nuevo.fecha_mantencion)
+                    };
+
+                    this.editableEquipo = {
+                        ...this.originalEquipo
+                    };
+
                     this.actualizarFechaMantencion();
                     this.cargarHistorial();
                 }
@@ -152,14 +164,22 @@ export default {
     methods: {
         ...mapActions(['cargarHistorial']),
         guardarCambios() {
-            const equipoAEnviar = {
-                ...this.editableEquipo,
-                fecha_periodo: this.editableEquipo.fecha_periodo,
-                fecha_entrega: this.editableEquipo.fecha_entrega,
-                fecha_mantencion: this.editableEquipo.fecha_mantencion,
-            };
-            this.$emit('editar', equipoAEnviar);
-            this.$bvToast.toast('¡Cambios guardados correctamente!', {
+            // Se comprueba si hay cambios antes de enviar
+            if (deepIs(this.originalEquipo, this.editableEquipo)) {
+                this.$bvToast.toast('No hay cambios para guardar.', {
+                    title: 'Advertencia',
+                    variant: 'warning',
+                    solid: true,
+                    autoHideDelay: 3000
+                });
+                return;
+            }
+
+            // Si hay cambios, emitir el evento para que el padre los maneje
+            this.$emit('editar', this.editableEquipo);
+
+            // Mostrar el toast de éxito después de la emisión del evento
+            this.$bvToast.toast('¡Cambios guardados correctamente! ✅', {
                 title: 'Éxito',
                 variant: 'success',
                 solid: true,
@@ -171,8 +191,7 @@ export default {
                 this.editableEquipo.fecha_mantencion = null;
                 return;
             }
-            const [year, month, day] = this.editableEquipo.fecha_periodo.split('-').map(Number);
-            const fecha_periodo = new Date(year, month - 1, day);
+            const fecha_periodo = new Date(this.editableEquipo.fecha_periodo);
             if (isNaN(fecha_periodo.getTime())) {
                 this.editableEquipo.fecha_mantencion = null;
                 return;
@@ -212,7 +231,3 @@ export default {
     }
 };
 </script>
-
-<style>
-/* ... (estilos originales) */
-</style>
