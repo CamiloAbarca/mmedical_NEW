@@ -467,7 +467,8 @@ export default new Vuex.Store({
     },
 
     // Acción para cambiar la contraseña de un usuario
-    async changePassword({ rootState }, { id, currentPassword, newPassword }) {
+    async changePassword({ rootState }, payload) {
+      const { id, currentPassword, newPassword } = payload;
       const token = localStorage.getItem("token");
       const userId = rootState.user?.id;
 

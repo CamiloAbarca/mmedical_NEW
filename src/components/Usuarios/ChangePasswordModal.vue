@@ -17,7 +17,8 @@
             </b-form-group>
 
             <div class="d-flex justify-content-end mt-3">
-                <b-button type="submit" variant="primary" style="background-color: #c7f464; border-color: #c7f464; color: #333; margin-right: 8px;"
+                <b-button type="submit" variant="primary"
+                    style="background-color: #c7f464; border-color: #c7f464; color: #333; margin-right: 8px;"
                     class="me-2" :disabled="loading">
                     <b-spinner v-if="loading" small />
                     <span v-else>Cambiar Contraseña</span>
@@ -71,6 +72,7 @@ export default {
             this.loading = true;
 
             try {
+                // Pass the entire form object to the action
                 await this.changePassword({
                     id: this.obtenerUsuario.id,
                     currentPassword: this.form.currentPassword,
