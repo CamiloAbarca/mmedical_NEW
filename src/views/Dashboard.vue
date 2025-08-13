@@ -141,7 +141,8 @@ export default {
     },
   },
   async created() {
-    await this.cargarEquipos();
+    // Se elimina la carga de datos aquí. Ahora se realiza en DashboardLayout.vue.
+    // Los datos estarán disponibles en el store de Vuex antes de que el componente se monte.
   },
   methods: {
     ...mapActions(['cargarEquipos']),
