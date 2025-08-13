@@ -29,22 +29,8 @@
       </b-col>
     </b-row>
 
-    <b-skeleton-table
-      v-if="cargandoEquipos"
-      :rows="10"
-      :columns="fields.length"
-      animation="wave"
-      class="mb-3"
-    />
-    <b-table
-      v-else
-      :items="paginatedEquipos"
-      :fields="fields"
-      responsive
-      striped
-      hover
-      small
-    >
+    <b-skeleton-table v-if="cargandoEquipos" :rows="10" :columns="fields.length" animation="wave" class="mb-3" />
+    <b-table v-else :items="paginatedEquipos" :fields="fields" responsive striped hover small>
       <template #cell(fecha_mantencion)="row">
         <span :class="{ 'text-danger font-weight-bold': esFechaProxima(row.item.fecha_mantencion) }">
           {{ formatearFecha(row.item.fecha_mantencion) }}
@@ -58,37 +44,17 @@
       </template>
     </b-table>
 
-    <b-pagination
-      v-if="!cargandoEquipos"
-      v-model="paginaActual"
-      :total-rows="equiposFiltrados.length"
-      :per-page="porPagina"
-      align="center"
-      class="mt-3"
-      pills
-      variant="primary"
-    />
+    <b-pagination v-if="!cargandoEquipos" v-model="paginaActual" :total-rows="equiposFiltrados.length"
+      :per-page="porPagina" align="center" class="mt-3" pills variant="primary" />
 
     <b-alert v-if="alertaVisible && alertaTipo === 'actualizado'" variant="success" dismissible
       @dismissed="alertaVisible = false">
       ¡Equipo actualizado correctamente!
     </b-alert>
 
-    <b-alert
-      v-if="alertaVisible && alertaTipo === 'eliminado'"
-      variant="danger"
-      dismissible
-      @dismissed="alertaVisible = false"
-      show
-      class="d-flex align-items-center py-3 px-4"
-      style="font-size: 1.1rem;"
-    >
-      <b-icon
-        icon="exclamation-triangle-fill"
-        variant="danger"
-        font-scale="2"
-        class="mr-3 flex-shrink-0"
-      />
+    <b-alert v-if="alertaVisible && alertaTipo === 'eliminado'" variant="danger" dismissible
+      @dismissed="alertaVisible = false" show class="d-flex align-items-center py-3 px-4" style="font-size: 1.1rem;">
+      <b-icon icon="exclamation-triangle-fill" variant="danger" font-scale="2" class="mr-3 flex-shrink-0" />
       <div>
         <div class="font-weight-bold mb-1">¡Equipo eliminado exitosamente!</div>
         <div class="small text-danger">Esta acción <span class="font-weight-bold">no se puede deshacer</span>.</div>
@@ -98,19 +64,11 @@
     <EquipoModal v-if="equipoSeleccionado" :equipo="equipoSeleccionado" @cerrar="cerrarModal" @editar="editarEquipo"
       @eliminar="eliminarEquipoSeleccionado" />
 
-    <b-modal
-      id="modal-confirmar-eliminar"
-      ref="modalConfirmarEliminar"
-      title="¿Eliminar equipo?"
-      ok-title="Sí, eliminar"
-      cancel-title="Cancelar"
-      ok-variant="danger"
-      cancel-variant="secondary"
-      centered
-      @ok="confirmarEliminarEquipo"
-    >
+    <b-modal id="modal-confirmar-eliminar" ref="modalConfirmarEliminar" title="¿Eliminar equipo?"
+      ok-title="Sí, eliminar" cancel-title="Cancelar" ok-variant="danger" cancel-variant="secondary" centered
+      @ok="confirmarEliminarEquipo">
       <div class="d-flex align-items-center">
-        <b-icon icon="exclamation-triangle-fill" variant="danger" font-scale="2" class="mr-3"/>
+        <b-icon icon="exclamation-triangle-fill" variant="danger" font-scale="2" class="mr-3" />
         <div>
           <div class="font-weight-bold mb-2 text-danger">¿Estás seguro que deseas eliminar este equipo?</div>
           <div class="small text-muted">Esta acción <span class="font-weight-bold">no se puede deshacer</span>.</div>
@@ -199,7 +157,9 @@ export default {
     abrirModal(equipo) {
       this.equipoSeleccionado = equipo
       this.mostrarModal = true
-      this.$root.$emit('bv::show::modal', 'modal-equipo')
+      this.$nextTick(() => { // <-- Se agrega esta línea
+        this.$root.$emit('bv::show::modal', 'modal-equipo')
+      }) // <-- Se cierra el nextTick aquí
     },
     cerrarModal() {
       this.mostrarModal = false

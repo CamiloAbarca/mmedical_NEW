@@ -115,7 +115,9 @@ export default {
     ...mapActions(['cargarClientes', 'eliminarCliente', 'actualizarCliente']),
     abrirModal(cliente) {
       this.clienteSeleccionado = cliente;
-      this.$root.$emit('bv::show::modal', 'modal-cliente');
+      this.$nextTick(() => {
+        this.$root.$emit('bv::show::modal', 'modal-cliente');
+      });
     },
     cerrarModal() {
       this.clienteSeleccionado = null;
