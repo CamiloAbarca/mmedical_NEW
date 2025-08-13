@@ -98,7 +98,7 @@ export default {
 }
 
 .iconos {
-  color: #c7f464 !important;
+  color: #91f373 !important;
 }
 
 
