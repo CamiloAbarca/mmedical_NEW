@@ -4,6 +4,10 @@
             <b-button variant="light" class="me-2 d-md-none" @click="mobileSidebar = true">
                 ☰
             </b-button>
+            <b-button variant="dark" class="d-none d-md-inline-block" @click="collapsed = !collapsed"
+                style="margin-right: 10px;">
+                <b-icon :icon="collapsed ? 'chevron-double-right' : 'chevron-double-left'" />
+            </b-button>
 
             <b-navbar-brand href="#">
                 <img src="@/assets/logo.png" alt="Mmedical Logo" class="d-none d-sm-inline-block align-top"
@@ -12,9 +16,21 @@
                     style="height: 32px;" />
             </b-navbar-brand>
 
-            <b-button variant="light" class="me-2 d-none d-md-inline-block" @click="collapsed = !collapsed">
-                <b-icon :icon="collapsed ? 'chevron-double-right' : 'chevron-double-left'" />
-            </b-button>
+            <b-navbar-nav class="ml-auto" v-if="obtenerUsuario">
+                <b-dropdown dropdown variant="info" class="user-dropdown mt-1" right>
+                    <template #button-content>
+                        <b-icon icon="person-fill" class="me-2" />
+                        <span> {{ obtenerUsuario.nombre }}</span>
+                    </template>
+                    <b-dropdown-item @click="$bvModal.show('modal-change-password')">
+                        Cambiar Contraseña
+                    </b-dropdown-item>
+                </b-dropdown>
+                <b-button variant="danger" class="logout-btn mt-2 ml-2" @click="logout">
+                    <b-icon icon="box-arrow-right" class="me-2" />
+                </b-button>
+            </b-navbar-nav>
+
         </b-navbar>
 
         <div class="d-flex flex-grow-1 overflow-hidden">
@@ -41,7 +57,7 @@
 <script>
 import AppSidebar from './AppSidebar.vue';
 import ChangePasswordModal from './Usuarios/ChangePasswordModal.vue';
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 
 export default {
     name: 'DashboardLayout',
@@ -55,12 +71,12 @@ export default {
     computed: {
         ...mapGetters(['obtenerUsuario']),
     },
-    created() {
-        // Restaurar el estado del usuario desde localStorage al cargar el componente
+    async created() {
         const user = localStorage.getItem('user');
         if (user) {
             try {
                 this.SET_USER(JSON.parse(user));
+                await this.cargarEquipos();
             } catch (e) {
                 console.error("Error al parsear el usuario de localStorage:", e);
                 localStorage.removeItem('user');
@@ -70,6 +86,7 @@ export default {
     },
     methods: {
         ...mapMutations(['SET_USER']),
+        ...mapActions(['cargarEquipos']),
         logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -109,12 +126,19 @@ export default {
 }
 
 .custom-navbar {
-    background-color: #556270;
+    background-color: #5b6570;
     color: #ffffff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .custom-navbar .navbar-brand,
 .custom-navbar .navbar-nav .nav-link {
+    color: #ffffff !important;
+}
+
+.logout-btn {
+    background-color: #ff6b6b !important;
+    border-color: #ff6b6b !important;
     color: #ffffff !important;
 }
 </style>

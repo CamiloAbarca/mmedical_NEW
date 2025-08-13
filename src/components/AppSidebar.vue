@@ -27,22 +27,6 @@
         <span v-if="!collapsed"> Usuarios</span>
       </transition>
     </b-nav-item>
-
-    <b-dropdown dropdown variant="info" class="user-dropdown mt-4" v-if="obtenerUsuario">
-      <template #button-content>
-        <b-icon icon="person-fill" class="me-2" />
-        <transition name="fade">
-          <span v-if="!collapsed" class="ms-2"> {{ obtenerUsuario.nombre }}</span>
-        </transition>
-      </template>
-      <b-dropdown-item @click="$bvModal.show('modal-change-password')">
-        Cambiar Contraseña
-      </b-dropdown-item>
-    </b-dropdown>
-    <b-button variant="danger" class="logout-btn mt-2" block @click="logout" v-if="!collapsed">
-      <b-icon icon="box-arrow-right" class="me-2" />
-      Cerrar Sesión
-    </b-button>
   </b-nav>
 </template>
 
@@ -57,34 +41,16 @@ export default {
   },
   computed: {
     ...mapGetters(['obtenerUsuario']),
-    isSuperUser() {
-      const user = this.obtenerUsuario;
-      return user && user.tipo === 'super';
-    }
   },
   methods: {
-    logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      this.$store.commit('SET_USER', null);
-
-      this.$bvToast.toast('Sesión cerrada correctamente.', {
-        title: 'Logout',
-        variant: 'info',
-        solid: true,
-        autoHideDelay: 2500
-      });
-
-      this.$router.push('/login');
-      if (this.isMobile) this.$emit('close');
-    }
+    // La lógica de logout ya no es necesaria aquí.
   }
 }
 </script>
 
 <style scoped>
 .custom-sidebar {
-  background-color: #556270;
+  background-color: #888a8d;
   height: 100%;
   min-height: 100vh;
   transition: all 0.3s ease;
@@ -98,13 +64,14 @@ export default {
 }
 
 .iconos {
-  color: #91f373 !important;
+  color: #2a2a2a !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 
 .nav-link-custom {
   color: white !important;
-  padding: 0.20rem 0.1rem;
+  padding: 0.50rem 0.1rem;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -112,11 +79,12 @@ export default {
 }
 
 .nav-link-custom span {
-  color: white !important;
+  color: #2a2a2a !important;
+  font-weight: 500;
 }
 
 .nav-link-custom:hover {
-  background-color: #33e3ba4e;
+  background-color: #757678;
   color: #556270 !important;
   transform: translateX(5px);
 }
