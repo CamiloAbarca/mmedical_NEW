@@ -7,11 +7,12 @@
         <b-table v-else :items="paginatedUsuarios" :fields="fields" responsive striped hover small>
             <template #cell(acciones)="row">
                 <b-button size="sm" :title="'Editar usuario ' + row.item.id" class="btn-icono me-2"
-                    @click="abrirModalEditar(row.item)">
+                    @click="abrirModalEditar(row.item)"
+                    style="background-color: #c7f464; border-color: #c7f464; color: #333; margin-right: 8px;">
                     <b-icon icon="pencil" font-scale="1" />
                 </b-button>
                 <b-button size="sm" :title="'Eliminar usuario ' + row.item.id" class="btn-icono"
-                    @click="abrirModalEliminar(row.item)">
+                    @click="abrirModalEliminar(row.item)" style="background-color: #ff6b6b; border-color: #ff6b6b">
                     <b-icon icon="trash" font-scale="1" />
                 </b-button>
             </template>
@@ -43,8 +44,8 @@
                     </b-form-select>
                 </b-form-group>
                 <div class="text-end mt-3">
-                    <b-button variant="success" type="submit" class="me-2">Guardar cambios</b-button>
-                    <b-button variant="danger" @click="cerrarModalEditar">Cancelar</b-button>
+                    <b-button variant="success" type="submit" class="me-2" style="background-color: #c7f464; border-color: #c7f464; color: #333; margin-right: 8px;">Guardar cambios</b-button>
+                    <b-button variant="danger" @click="cerrarModalEditar" style="background-color: #ff6b6b; border-color: #ff6b6b">Cancelar</b-button>
                 </div>
             </b-form>
         </b-modal>
@@ -60,7 +61,7 @@
                 </div>
             </div>
             <div class="d-flex justify-content-end mt-3">
-                <b-button variant="secondary" class="me-2" @click="cerrarModalEliminar">Cancelar</b-button>
+                <b-button variant="secondary" class="me-2" @click="cerrarModalEliminar" style="margin-right: 8px;">Cancelar</b-button>
                 <b-button variant="danger" @click="confirmarEliminarUsuario">Eliminar</b-button>
             </div>
         </b-modal>

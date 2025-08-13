@@ -1,34 +1,34 @@
 <template>
   <b-nav vertical class="custom-sidebar p-3">
     <b-nav-item to="/dashboard" class="nav-link-custom">
-      <b-icon icon="speedometer" class="me-2" />
+      <b-icon icon="speedometer" class="me-2 iconos" />
       <transition name="fade">
         <span v-if="!collapsed"> Dashboard</span>
       </transition>
     </b-nav-item>
 
     <b-nav-item to="/equipos" class="nav-link-custom">
-      <b-icon icon="cpu" class="me-2" />
+      <b-icon icon="cpu" class="me-2 iconos" />
       <transition name="fade">
         <span v-if="!collapsed"> Equipos</span>
       </transition>
     </b-nav-item>
 
     <b-nav-item to="/clientes" class="nav-link-custom">
-      <b-icon icon="people-fill" class="me-2" />
+      <b-icon icon="people-fill" class="me-2 iconos" />
       <transition name="fade">
         <span v-if="!collapsed"> Clientes</span>
       </transition>
     </b-nav-item>
 
-    <b-nav-item v-if="isSuperUser" to="/usuarios" class="nav-link-custom">
-      <b-icon icon="person-lines-fill" class="me-2" />
+    <b-nav-item to="/usuarios" class="nav-link-custom">
+      <b-icon icon="person-lines-fill" class="me-2 iconos" />
       <transition name="fade">
         <span v-if="!collapsed"> Usuarios</span>
       </transition>
     </b-nav-item>
 
-    <b-dropdown dropdown variant="primary" class="user-dropdown mt-4" v-if="obtenerUsuario">
+    <b-dropdown dropdown variant="info" class="user-dropdown mt-4" v-if="obtenerUsuario">
       <template #button-content>
         <b-icon icon="person-fill" class="me-2" />
         <transition name="fade">
@@ -93,7 +93,12 @@ export default {
 
 .nav-link-custom b-icon,
 .logout-btn b-icon {
-  color: #6134f4 !important;
+  color: #c7f464 !important;
+  /* Cambiado a tu color de éxito */
+}
+
+.iconos {
+  color: #c7f464 !important;
 }
 
 
@@ -111,7 +116,7 @@ export default {
 }
 
 .nav-link-custom:hover {
-  background-color: #c7f464;
+  background-color: #33e3ba4e;
   color: #556270 !important;
   transform: translateX(5px);
 }

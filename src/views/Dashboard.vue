@@ -67,8 +67,8 @@ export default {
       return this.obtenerEquipos.length;
     },
 
-    equiposFacturados() {
-      return this.obtenerEquipos.filter(e => e.estado === 'Facturado').length;
+    equiposRevision() {
+      return this.obtenerEquipos.filter(e => e.estado === 'En Revisión').length;
     },
 
     equiposNecesitanRevision() {
@@ -96,7 +96,7 @@ export default {
     resumenCards() {
       return [
         { label: 'Total Equipos', valor: this.totalEquipos, color: 'primary' },
-        { label: 'Facturados', valor: this.equiposFacturados, color: 'success' },
+        { label: 'En Revisión', valor: this.equiposRevision, color: 'info' },
         { label: 'Necesitan mantención', valor: this.equiposNecesitanRevision, color: 'danger' },
       ];
     },
@@ -140,8 +140,8 @@ export default {
       };
     },
   },
-  created() {
-    this.cargarEquipos();
+  async created() {
+    await this.cargarEquipos();
   },
   methods: {
     ...mapActions(['cargarEquipos']),

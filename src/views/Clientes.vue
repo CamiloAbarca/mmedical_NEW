@@ -32,12 +32,12 @@
           <b-form-input id="centroMedico" v-model.trim="form.centroMedico" required placeholder="Ej: Alameda" />
         </b-form-group>
         <div class="text-end mt-3">
-          <b-button variant="danger" style="background-color: #ff6b6b; border-color: #ff6b6b" class="me-2"
-            @click="cerrarModal">
-            Cancelar
-          </b-button>
-          <b-button type="submit" style="background-color: #c7f464; border-color: #c7f464; color: #333">
+          <b-button type="submit"
+            style="background-color: #c7f464; border-color: #c7f464; color: #333; margin-right: 8px;">
             Guardar
+          </b-button>
+          <b-button variant="danger" style="background-color: #ff6b6b; border-color: #ff6b6b" @click="cerrarModal">
+            Cancelar
           </b-button>
         </div>
       </b-form>

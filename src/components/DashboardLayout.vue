@@ -41,7 +41,7 @@
 <script>
 import AppSidebar from './AppSidebar.vue';
 import ChangePasswordModal from './Usuarios/ChangePasswordModal.vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 
 export default {
     name: 'DashboardLayout',
@@ -55,11 +55,25 @@ export default {
     computed: {
         ...mapGetters(['obtenerUsuario']),
     },
+    created() {
+        // Restaurar el estado del usuario desde localStorage al cargar el componente
+        const user = localStorage.getItem('user');
+        if (user) {
+            try {
+                this.SET_USER(JSON.parse(user));
+            } catch (e) {
+                console.error("Error al parsear el usuario de localStorage:", e);
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+            }
+        }
+    },
     methods: {
+        ...mapMutations(['SET_USER']),
         logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            this.$store.commit('SET_USER', null);
+            this.SET_USER(null);
 
             this.$bvToast.toast('Sesión cerrada correctamente.', {
                 title: 'Logout',
