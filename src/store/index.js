@@ -424,16 +424,50 @@ export default new Vuex.Store({
       }
     },
 
+    // Actualizar usuario (PUT API)
     async actualizarUsuario({ commit }, usuario) {
-      console.warn("API para actualizar usuario no implementada.");
-      commit("UPDATE_USUARIO", usuario);
-    },
-    async eliminarUsuario({ commit }, id) {
-      console.warn("API para eliminar usuario no implementada.");
-      commit("DELETE_USUARIO", id);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `https://mmedical.cl/api/usuarios/${usuario.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+            body: JSON.stringify(usuario),
+          }
+        );
+        if (!response.ok) throw new Error("Error al actualizar usuario");
+        const usuarioActualizado = await response.json();
+        commit("UPDATE_USUARIO", usuarioActualizado);
+      } catch (error) {
+        console.error("Error al actualizar usuario:", error);
+        throw error;
+      }
     },
 
-    async changePassword({ rootState }, { currentPassword, newPassword }) {
+    // Eliminar usuario (DELETE API)
+    async eliminarUsuario({ commit }, id) {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`https://mmedical.cl/api/usuarios/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) throw new Error("Error al eliminar usuario");
+        commit("DELETE_USUARIO", id);
+      } catch (error) {
+        console.error("Error al eliminar usuario:", error);
+        throw error;
+      }
+    },
+
+    // Acción para cambiar la contraseña de un usuario
+    async changePassword({ rootState }, { id, currentPassword, newPassword }) {
       const token = localStorage.getItem("token");
       const userId = rootState.user?.id;
 
@@ -443,7 +477,7 @@ export default new Vuex.Store({
 
       try {
         const response = await fetch(
-          `https://mmedical.cl/api/usuarios/${userId}/change-password`,
+          `https://mmedical.cl/api/usuarios/change-password/${id}`,
           {
             method: "PUT",
             headers: {
@@ -459,7 +493,9 @@ export default new Vuex.Store({
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "Error al cambiar la contraseña.");
+          throw new Error(
+            errorData.message || "Error al cambiar la contraseña."
+          );
         }
 
         console.log("Contraseña cambiada con éxito!");

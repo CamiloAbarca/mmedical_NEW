@@ -1,8 +1,5 @@
 <template>
     <b-modal id="modal-change-password" title="Cambiar Contraseña" hide-footer centered>
-        <b-alert show variant="info" class="text-center">
-            Funcionalidad pendiente: La API para cambiar la contraseña no está implementada.
-        </b-alert>
         <b-form @submit.prevent="changePassword">
             <b-form-group label="Contraseña actual" label-for="current-password">
                 <b-form-input id="current-password" type="password" v-model="form.currentPassword" required
@@ -21,8 +18,9 @@
 
             <div class="d-flex justify-content-end mt-3">
                 <b-button type="submit" variant="primary" style="background-color: #4ecdc4; border-color: #4ecdc4"
-                    class="me-2" disabled>
-                    Cambiar Contraseña
+                    class="me-2" :disabled="loading">
+                    <b-spinner v-if="loading" small />
+                    <span v-else>Cambiar Contraseña</span>
                 </b-button>
                 <b-button variant="secondary" @click="$bvModal.hide('modal-change-password')">
                     Cancelar
@@ -33,6 +31,8 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
+
 export default {
     name: 'ChangePasswordModal',
     data() {
@@ -42,11 +42,15 @@ export default {
                 newPassword: '',
                 confirmPassword: '',
             },
+            loading: false,
         };
     },
+    computed: {
+        ...mapGetters(['obtenerUsuario']),
+    },
     methods: {
-        changePassword() {
-            // Validaciones básicas
+        ...mapActions(['changePassword']),
+        async changePassword() {
             if (this.form.newPassword.length < 6) {
                 this.$bvToast.toast('La nueva contraseña debe tener al menos 6 caracteres.', {
                     title: 'Error de validación',
@@ -64,14 +68,30 @@ export default {
                 return;
             }
 
-            // Lógica de cambio de contraseña (PENDIENTE DE LA API)
-            this.$bvToast.toast('Funcionalidad pendiente: la API para cambiar la contraseña no está implementada.', {
-                title: 'Atención',
-                variant: 'warning',
-                solid: true
-            });
-            this.$bvModal.hide('modal-change-password');
-            this.resetForm();
+            this.loading = true;
+
+            try {
+                await this.changePassword({
+                    id: this.obtenerUsuario.id,
+                    currentPassword: this.form.currentPassword,
+                    newPassword: this.form.newPassword
+                });
+                this.$bvToast.toast('Contraseña cambiada con éxito.', {
+                    title: 'Éxito',
+                    variant: 'success',
+                    solid: true
+                });
+                this.$bvModal.hide('modal-change-password');
+                this.resetForm();
+            } catch (error) {
+                this.$bvToast.toast(error.message, {
+                    title: 'Error',
+                    variant: 'danger',
+                    solid: true
+                });
+            } finally {
+                this.loading = false;
+            }
         },
         resetForm() {
             this.form.currentPassword = '';
