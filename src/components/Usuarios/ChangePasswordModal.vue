@@ -1,6 +1,6 @@
 <template>
     <b-modal id="modal-change-password" title="Cambiar Contraseña" hide-footer centered>
-        <b-form @submit.prevent="changePassword">
+        <b-form @submit.prevent="handlePasswordChange">
             <b-form-group label="Contraseña actual" label-for="current-password">
                 <b-form-input id="current-password" type="password" v-model="form.currentPassword" required
                     placeholder="Ingresa tu contraseña actual"></b-form-input>
@@ -51,7 +51,7 @@ export default {
     },
     methods: {
         ...mapActions(['changePassword']),
-        async changePassword() {
+        async handlePasswordChange() {
             if (this.form.newPassword.length < 6) {
                 this.$bvToast.toast('La nueva contraseña debe tener al menos 6 caracteres.', {
                     title: 'Error de validación',
@@ -72,7 +72,6 @@ export default {
             this.loading = true;
 
             try {
-                // Pass the entire form object to the action
                 await this.changePassword({
                     id: this.obtenerUsuario.id,
                     currentPassword: this.form.currentPassword,
