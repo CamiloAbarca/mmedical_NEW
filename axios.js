@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://mmedical.cl/api",
+  baseURL: "https://mmedical.cl/api",
 });
 
 instance.interceptors.request.use((config) => {

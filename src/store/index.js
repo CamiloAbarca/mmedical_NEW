@@ -157,7 +157,7 @@ export default new Vuex.Store({
     // Agregar equipo (POST API)
     async agregarEquipo({ commit }, equipo) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/equipos", {
           method: "POST",
           headers: {
@@ -177,7 +177,7 @@ export default new Vuex.Store({
     // Actualizar equipo (PUT API)
     async actualizarEquipo({ commit, dispatch, state }, equipo) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const equipoAnterior = state.equipos.find((e) => e.id === equipo.id);
 
         if (!equipoAnterior) {
@@ -250,7 +250,7 @@ export default new Vuex.Store({
     // Eliminar equipo (DELETE API)
     async eliminarEquipo({ commit }, id) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch(`https://mmedical.cl/api/equipos/${id}`, {
           method: "DELETE",
           headers: {
@@ -268,7 +268,7 @@ export default new Vuex.Store({
     // Acción para registrar un nuevo movimiento en el historial
     async agregarHistorial(context, historial) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/historial", {
           method: "POST",
           headers: {
@@ -287,7 +287,7 @@ export default new Vuex.Store({
     // Acción para cargar el historial de un equipo
     async cargarHistorial(context, id_equipo) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch(
           `https://mmedical.cl/api/historial/equipo/${id_equipo}`,
           {
@@ -308,7 +308,7 @@ export default new Vuex.Store({
     // Cargar clientes
     async cargarClientes({ commit }) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/clientes", {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",
@@ -326,7 +326,7 @@ export default new Vuex.Store({
     // Agregar cliente (POST API)
     async agregarCliente({ commit }, cliente) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/clientes", {
           method: "POST",
           headers: {
@@ -346,7 +346,7 @@ export default new Vuex.Store({
     // Actualizar cliente (PUT API)
     async actualizarCliente({ commit }, cliente) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch(
           `https://mmedical.cl/api/clientes/${cliente.id}`,
           {
@@ -370,7 +370,7 @@ export default new Vuex.Store({
     // Eliminar cliente (DELETE API)
     async eliminarCliente({ commit }, id) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch(`https://mmedical.cl/api/clientes/${id}`, {
           method: "DELETE",
           headers: {
@@ -388,7 +388,7 @@ export default new Vuex.Store({
     // Acción para cargar usuarios
     async cargarUsuarios({ commit }) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/usuarios/", {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",
@@ -427,7 +427,7 @@ export default new Vuex.Store({
     // Actualizar usuario (PUT API)
     async actualizarUsuario({ commit }, usuario) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch(
           `https://mmedical.cl/api/usuarios/${usuario.id}`,
           {
@@ -451,7 +451,7 @@ export default new Vuex.Store({
     // Eliminar usuario (DELETE API)
     async eliminarUsuario({ commit }, id) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch(`https://mmedical.cl/api/usuarios/${id}`, {
           method: "DELETE",
           headers: {
@@ -469,7 +469,7 @@ export default new Vuex.Store({
     // Acción para cambiar la contraseña de un usuario
     async changePassword({ rootState }, payload) {
       const { id, currentPassword, newPassword } = payload;
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const userId = rootState.user?.id;
 
       if (!token || !userId) {

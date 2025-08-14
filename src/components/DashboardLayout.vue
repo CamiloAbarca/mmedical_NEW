@@ -88,8 +88,8 @@ export default {
         ...mapMutations(['SET_USER']),
         ...mapActions(['cargarEquipos']),
         logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
             this.SET_USER(null);
 
             this.$bvToast.toast('Sesión cerrada correctamente.', {
