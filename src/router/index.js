@@ -1,23 +1,21 @@
+// camiloabarca/mmedical_new/mmedical_NEW-25387d354f645fea5b2688780011d61eba68a948/src/router/index.js
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
-import DashboardLayout from "../components/DashboardLayout.vue"; // Importa el nuevo layout
+import DashboardLayout from "../components/DashboardLayout.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
-  // Ruta para el login, no tiene layout
   { path: "/login", component: Login },
-
-  // Agrupa todas las rutas protegidas bajo un solo layout
   {
-    path: "/", // Esta ruta base ahora carga el DashboardLayout
+    path: "/",
     component: DashboardLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: "", redirect: "dashboard" }, // Redirige la ruta base a dashboard si está autenticado
+      { path: "", redirect: "dashboard" },
       {
-        path: "dashboard", // Nota: sin el '/' inicial
+        path: "dashboard",
         name: "Dashboard",
         component: () => import("../views/Dashboard.vue"),
       },
@@ -31,7 +29,6 @@ const routes = [
         name: "Equipos",
         component: () => import("../views/Equipos.vue"),
       },
-      // NUEVA RUTA PARA USUARIOS
       {
         path: "usuarios",
         name: "Usuarios",
@@ -44,7 +41,6 @@ const routes = [
 
 const router = new VueRouter({
   mode: "history",
-  base: "/control/",
   routes,
 });
 
