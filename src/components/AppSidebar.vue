@@ -1,37 +1,59 @@
 <template>
-  <b-nav vertical class="custom-sidebar p-3">
-    <b-nav-item to="/dashboard" class="nav-link-custom">
-      <b-icon icon="speedometer" class="me-2 iconos" />
+  <div :class="['sidebar-modern', { 'collapsed-sidebar': collapsed }]">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <img src="@/assets/logo-icon.png" alt="M" style="height: 32px;" />
       <transition name="fade">
-        <span v-if="!collapsed"> Dashboard</span>
+        <span v-if="!collapsed">Control de Equipos</span>
       </transition>
-    </b-nav-item>
+    </div>
 
-    <b-nav-item to="/equipos" class="nav-link-custom">
-      <b-icon icon="cpu" class="me-2 iconos" />
-      <transition name="fade">
-        <span v-if="!collapsed"> Equipos</span>
-      </transition>
-    </b-nav-item>
+    <!-- Menú -->
+    <b-nav vertical class="flex-grow-1 px-2">
+      <b-nav-item to="/dashboard" class="sidebar-item">
+        <b-icon icon="speedometer" class="iconos" />
+        <transition name="fade">
+          <span v-if="!collapsed" class="iconos"> Dashboard</span>
+        </transition>
+      </b-nav-item>
 
-    <b-nav-item to="/clientes" class="nav-link-custom">
-      <b-icon icon="people-fill" class="me-2 iconos" />
-      <transition name="fade">
-        <span v-if="!collapsed"> Clientes</span>
-      </transition>
-    </b-nav-item>
+      <b-nav-item to="/equipos" class="sidebar-item">
+        <b-icon icon="cpu" class="iconos"/>
+        <transition name="fade">
+          <span v-if="!collapsed" class="iconos"> Equipos</span>
+        </transition>
+      </b-nav-item>
 
-    <b-nav-item to="/usuarios" class="nav-link-custom">
-      <b-icon icon="person-lines-fill" class="me-2 iconos" />
+      <b-nav-item to="/clientes" class="sidebar-item">
+        <b-icon icon="people-fill" class="iconos"/>
+        <transition name="fade">
+          <span v-if="!collapsed" class="iconos"> Clientes</span>
+        </transition>
+      </b-nav-item>
+
+      <b-nav-item to="/usuarios" class="sidebar-item">
+        <b-icon icon="person-lines-fill" class="iconos"/>
+        <transition name="fade">
+          <span v-if="!collapsed" class="iconos"> Usuarios</span>
+        </transition>
+      </b-nav-item>
+    </b-nav>
+
+    <!-- Usuario -->
+    <div class="sidebar-user">
+      <b-icon icon="person-circle" font-scale="1.5" class="iconos"/>
       <transition name="fade">
-        <span v-if="!collapsed"> Usuarios</span>
+        <div v-if="!collapsed" class="user-info">
+          <strong>{{ obtenerUsuario?.nombre || 'Usuario' }}</strong>
+          <small>Cuenta Free</small>
+        </div>
       </transition>
-    </b-nav-item>
-  </b-nav>
+    </div>
+  </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'AppSidebar',
@@ -40,86 +62,106 @@ export default {
     isMobile: Boolean
   },
   computed: {
-    ...mapGetters(['obtenerUsuario']),
-  },
-  methods: {
-    // La lógica de logout ya no es necesaria aquí.
+    ...mapGetters(['obtenerUsuario'])
   }
 }
 </script>
 
 <style scoped>
-.custom-sidebar {
-  background-color: #888a8d;
-  height: 100%;
-  min-height: 100vh;
-  transition: all 0.3s ease;
-  padding-top: 1.5rem;
+.sidebar-modern {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  width: 240px;
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.nav-link-custom b-icon,
-.logout-btn b-icon {
-  color: #c7f464 !important;
-  /* Cambiado a tu color de éxito */
+.collapsed-sidebar {
+  width: 80px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.sidebar-item {
+  display: flex !important;
+  /* forzamos flex */
+  flex-direction: column !important;
+  /* icono arriba, texto abajo */
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.8rem 0.9rem;
+  color: #dc2626 !important;
+  /* Rojo base */
+  border-radius: 8px;
+  text-align: center;
+  /* centra el texto */
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.sidebar-item span {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.sidebar-item:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444 !important;
+  transform: translateY(-2px);
+}
+
+.sidebar-item b-icon {
+  font-size: 1.4rem;
+  transition: color 0.25s ease;
+  color: #dc2626;
+}
+
+.sidebar-item:hover b-icon {
+  color: #3b453f;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
 }
 
 .iconos {
-  color: #2a2a2a !important;
+  color: #667385 !important;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
+.sidebar-user b-icon {
+  color: #dc2626;
+}
 
-.nav-link-custom {
-  color: white !important;
-  padding: 0.50rem 0.1rem;
-  border-radius: 8px;
+.user-info {
   display: flex;
-  align-items: center;
-  transition: background 0.2s ease, transform 0.2s ease;
+  flex-direction: column;
+  font-size: 0.85rem;
 }
 
-.nav-link-custom span {
-  color: #2a2a2a !important;
-  font-weight: 500;
+.user-info small {
+  color: #0f53c954;
 }
 
-.nav-link-custom:hover {
-  background-color: #757678;
-  color: #556270 !important;
-  transform: translateX(5px);
-}
-
-.logout-btn {
-  background-color: #ff6b6b !important;
-  border: none;
-  transition: background 0.2s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logout-btn span {
-  color: white !important;
-}
-
-.logout-btn:hover {
-  background-color: #c44d58 !important;
-  transform: scale(1.05);
-}
-
-.user-dropdown .btn-primary {
-  background-color: #4ecdc4;
-  border-color: #4ecdc4;
-  color: white !important;
-  text-align: left;
-}
-
-.user-dropdown .btn-primary:hover {
-  background-color: #3b9f98;
-  border-color: #3b9f98;
-}
-
-/* Text transition */
+/* Fade */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;

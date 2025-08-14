@@ -4,7 +4,7 @@
             <b-button variant="light" class="me-2 d-md-none" @click="mobileSidebar = true">
                 ☰
             </b-button>
-            <b-button variant="dark" class="d-none d-md-inline-block" @click="collapsed = !collapsed"
+            <b-button variant="light" class="d-none d-md-inline-block" @click="collapsed = !collapsed"
                 style="margin-right: 10px;">
                 <b-icon :icon="collapsed ? 'chevron-double-right' : 'chevron-double-left'" />
             </b-button>
@@ -17,7 +17,7 @@
             </b-navbar-brand>
 
             <b-navbar-nav class="ml-auto" v-if="obtenerUsuario">
-                <b-dropdown dropdown variant="info" class="user-dropdown mt-1" right>
+                <b-dropdown dropdown variant="dark" class="user-dropdown mt-1" right>
                     <template #button-content>
                         <b-icon icon="person-fill" class="me-2" />
                         <span> {{ obtenerUsuario.nombre }}</span>
@@ -26,7 +26,7 @@
                         Cambiar Contraseña
                     </b-dropdown-item>
                 </b-dropdown>
-                <b-button variant="danger" class="logout-btn mt-2 ml-2" @click="logout">
+                <b-button variant="danger" class="logout-btn mt-1 ml-3" @click="logout">
                     <b-icon icon="box-arrow-right" class="me-2" />
                 </b-button>
             </b-navbar-nav>
@@ -126,9 +126,10 @@ export default {
 }
 
 .custom-navbar {
-    background-color: #5b6570;
+    background-color: rgba(0, 0, 0, 0.59);
     color: #ffffff;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    height: 50px;
 }
 
 .custom-navbar .navbar-brand,
