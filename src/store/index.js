@@ -116,7 +116,7 @@ export default new Vuex.Store({
     // Cargar equipos solo desde API
     async cargarEquipos({ commit, dispatch }) {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await fetch("https://mmedical.cl/api/equipos", {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",

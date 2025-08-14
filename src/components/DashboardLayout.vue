@@ -72,15 +72,15 @@ export default {
         ...mapGetters(['obtenerUsuario']),
     },
     async created() {
-        const user = localStorage.getItem('user');
+        const user = sessionStorage.getItem('user');
         if (user) {
             try {
                 this.SET_USER(JSON.parse(user));
                 await this.cargarEquipos();
             } catch (e) {
-                console.error("Error al parsear el usuario de localStorage:", e);
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
+                console.error("Error al parsear el usuario de sessionStorage:", e);
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('token');
             }
         }
     },

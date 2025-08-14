@@ -77,8 +77,8 @@ export default {
           const token = res.data.token;
           const user = res.data.user;
 
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(user));
+          sessionStorage.setItem('token', token);
+          sessionStorage.setItem('user', JSON.stringify(user));
 
           // Guardar el usuario en el store de Vuex
           this.$store.commit('SET_USER', user);

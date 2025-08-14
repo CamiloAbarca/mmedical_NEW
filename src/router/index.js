@@ -49,8 +49,8 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+  const isAuthenticated = !!sessionStorage.getItem("token");
+  const user = JSON.parse(sessionStorage.getItem("user"));
   const isSuperUser = user && user.tipo === "super";
 
   if (
